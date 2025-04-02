@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Faculty, Department, Course
+from .models import Faculty, Department, Course, Enrollment
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
@@ -8,4 +8,4 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ["name", "code"]
 
 
-admin.site.register([Faculty, Department])
+admin.site.register([Faculty, Department, Enrollment])

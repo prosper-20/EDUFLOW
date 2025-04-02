@@ -14,3 +14,19 @@ class IsCourseOwnerOrReadOnly(permissions.BasePermission):
             
         # Write permissions are only allowed to the owner of the course
         return obj.owner == request.user
+    
+    
+
+class IsStudent(permissions.BasePermission):
+    """
+    Custom permission to only allow users with 'Student' role to access the view.
+    """
+    message = "Only users with Student role can access this endpoint."
+
+    def has_permission(self, request, view):
+        # Check if the user is authenticated and has the 'Student' role
+        return bool(
+            request.user and 
+            request.user.is_authenticated and
+            request.user.role == 'Student'
+        )

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, Faculty, Department
+from .models import Course, Faculty, Department, Enrollment
 
 
 
@@ -36,3 +36,19 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ('faculty', 'department', 'name', 'code', "description", 'created_at', 'updated_at')
 
 
+# class EnrollmentSerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = Enrollment
+#         fields = "__all__"
+        
+
+
+class EnrollmentSerializer(serializers.ModelSerializer):
+    student = serializers.StringRelatedField()
+    course = serializers.StringRelatedField()
+    
+    class Meta:
+        model = Enrollment
+        fields = "__all__"
+        read_only_fields = ['enrollment_date', 'completion_date']
