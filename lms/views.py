@@ -1,14 +1,17 @@
 from django.shortcuts import render, get_object_or_404
-from .serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
+from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
+from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Course, Enrollment
+from .models import Course, Enrollment, Module
 from rest_framework.permissions import IsAuthenticated
-from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent
+from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent, IsInstructor
+from django.db.models import Count, Avg
+
 
 class CreateCourseAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsInstructor]
 
     def post(self, request):
         course = Course(owner=request.user)
@@ -21,7 +24,6 @@ class CreateCourseAPIView(APIView):
 
 
 class RetrieveCourseAPIView(APIView):
-
     permission_classes = [IsAuthenticated, IsCourseOwnerOrReadOnly]  
 
 
@@ -71,8 +73,6 @@ class CreateEnrollmentAPIView(APIView):
     def post(self, request, slug):
         student = request.user
         course = get_object_or_404(Course, slug=slug)
-        
-        # Check for existing enrollment (fixed typo in variable name)
         existing_enrollment = Enrollment.objects.filter(course=course, student=student)
         
         if existing_enrollment.exists():
@@ -81,17 +81,84 @@ class CreateEnrollmentAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Create new enrollment
         enrollment = Enrollment.objects.create(student=student, course=course)
-        
-        # Serialize the created enrollment instance (not the queryset)
         serializer = EnrollmentSerializer(enrollment)
         
-        return Response(
-            {
-                "Success": "You have successfully enrolled!",
-                "data": serializer.data
-            }, 
-            status=status.HTTP_201_CREATED
-        )
+        return Response({"Success": "You have successfully enrolled!", "data": serializer.data}, status=status.HTTP_201_CREATED)
+    
+
+
+class ListAllMyCourseEnrollments(APIView):
+    permission_classes = [IsStudent]
+
+    def get(self, request, *args, **kwargs):
+        completed = self.request.query_params.get('completed')
+        data = {}
+        student = request.user
+        if completed:
+           enrollments = Enrollment.objects.filter(student=student, status='completed')
+        else:
+            enrollments = Enrollment.objects.filter(student=student)
+        enrollment_count = enrollments.count()
+        data["enrollment_count"] = enrollment_count
+        serializer = EnrollmentSerializer(enrollments, many=True)
+        data.update({"data": serializer.data})
+        return Response(data, status=status.HTTP_200_OK)
+
+
+
+class CreateModuleAPIView(APIView):
+    permission_classes = [IsInstructor]
+
+    def post(self, request, slug, *args, **kwargs):
+        course = get_object_or_404(Course, slug=slug)
+        module = Module(course=course)
+        serializer = ModuleCreateSerializer(module, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"Success": "Module created successfully",
+                         "data": serializer.data}, status=status.HTTP_201_CREATED)
+
+
+class ListCourseModuleAPIView(APIView):
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]  # Any authenticated user can view
+        elif self.request.method == 'PUT':
+            return [IsInstructor()]  # Only instructors can create
+        return super().get_permissions()
+
+
+    def get(self, request, slug):
+        course = get_object_or_404(Course, slug=slug)
+        course_modules = course.modules.all()
+        serializer = ModuleSerializer(course_modules, many=True)
+        return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+    
+
+class RetrieveCourseModuleAPIView(APIView):
+    permission_classes = [IsInstructor, IsCourseOwnerOrReadOnly]
+
+    def get(self, request, slug, module_id):
+        course = get_object_or_404(Course, slug=slug)
+        module = get_object_or_404(Module, id=module_id, course=course)
+        serializer = ModuleSerializer(module)
+        return Response({"data":serializer.data}, status=status.HTTP_200_OK)
+
+    def put(self, request, slug, module_id):
+        course = get_object_or_404(Course, slug=slug)
+        module = get_object_or_404(Module, id=module_id, course=course)
+        serializer = ModuleCreateSerializer(module, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"Success": "Module updated successfully!",
+                         "data": serializer.data}, status=status.HTTP_200_OK)
+    
+
+    def delete(self, request, slug, module_id):
+        course = get_object_or_404(Course, slug=slug)
+        module = get_object_or_404(Module, id=module_id, course=course)
+        module.delete()
+        return Response({"Success": "Module deleted successfully!"}, status=status.HTTP_204_NO_CONTENT)
+
 

@@ -30,3 +30,19 @@ class IsStudent(permissions.BasePermission):
             request.user.is_authenticated and
             request.user.role == 'Student'
         )
+    
+
+
+class IsInstructor(permissions.BasePermission):
+    """
+    Custom permission to only allow users with 'Student' role to access the view.
+    """
+    message = "Only users with Instructor role can access this endpoint."
+
+    def has_permission(self, request, view):
+        # Check if the user is authenticated and has the 'Student' role
+        return bool(
+            request.user and 
+            request.user.is_authenticated and
+            request.user.role == 'Instructor'
+        )

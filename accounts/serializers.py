@@ -148,3 +148,20 @@ class LoginSerializer(serializers.Serializer):
 
         data['user'] = user
         return data
+    
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField("get_user_data")
+    class Meta:
+        model = UserProfile
+        fields = '__all__'
+
+    def get_user_data(self, obj:UserProfile):
+        return obj.user.username, obj.user.email
+    
+
+
+class EditUserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ["image", "course"]

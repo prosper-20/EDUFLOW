@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, Faculty, Department, Enrollment
+from lms.models import Course, Faculty, Department, Enrollment
 
 
 
@@ -36,11 +36,6 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ('faculty', 'department', 'name', 'code', "description", 'created_at', 'updated_at')
 
 
-# class EnrollmentSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = Enrollment
-#         fields = "__all__"
         
 
 

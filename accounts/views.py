@@ -1,14 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from accounts.serializers import UserCreationSerializer, InstructorCreationSerializer, LoginSerializer
-from .models import CustomToken
+from accounts.serializers import UserCreationSerializer, InstructorCreationSerializer, LoginSerializer, UserProfileSerializer, EditUserProfileSerializer
+from .models import CustomToken, UserProfile
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-
+from rest_framework.permissions import IsAuthenticated
 
 User = get_user_model()
 
@@ -63,3 +63,23 @@ class LoginAPIView(APIView):
             else:
                 return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        profile = get_object_or_404(UserProfile, user=user)
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request):
+        user = request.user
+        profile = get_object_or_404(UserProfile, user=user)
+        serializer = EditUserProfileSerializer(profile, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"Success": "Profile update successful", 
+                         "data": serializer.data}, status=status.HTTP_202_ACCEPTED)
+
