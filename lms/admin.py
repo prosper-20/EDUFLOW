@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Faculty, Department, Course, Enrollment, Module
+from .models import Faculty, Department, Course, Enrollment, Module, Content
+
 
 class ModuleInline(admin.StackedInline):
     model = Module
@@ -13,9 +14,13 @@ class CourseAdmin(admin.ModelAdmin):
     inlines = [ModuleInline]
 
 
-admin.site.register([Faculty, Department, Enrollment])
+admin.site.register([Faculty, Department, Enrollment, Module])
 
 
+@admin.register(Content)
+class ContentAdmin(admin.ModelAdmin):
+    list_display = ["module", "content_type"]
+    list_filter = ["module", "content_type"]
 
 
 

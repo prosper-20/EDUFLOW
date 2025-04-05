@@ -167,10 +167,9 @@ class ItemBase(models.Model):
                               related_name='%(class)s_related',
                               on_delete=models.CASCADE)
     title = models.CharField(max_length=250)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
 
     class Meta:
         abstract = True
@@ -188,7 +187,7 @@ class File(ItemBase):
 
 
 class Image(ItemBase):
-       file = models.FileField(upload_to='images')
+    file = models.FileField(upload_to='images')
 
 
 class Video(ItemBase):

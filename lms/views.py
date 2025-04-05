@@ -1,10 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
-from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer
+from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Course, Enrollment, Module
+from .models import Course, Enrollment, Module, Content
 from rest_framework.permissions import IsAuthenticated
 from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent, IsInstructor
 from django.db.models import Count, Avg
@@ -162,3 +162,20 @@ class RetrieveCourseModuleAPIView(APIView):
         return Response({"Success": "Module deleted successfully!"}, status=status.HTTP_204_NO_CONTENT)
 
 
+
+class ContentCreateAPIView(APIView):
+    permission_classes = [IsInstructor, IsCourseOwnerOrReadOnly]
+
+    def post(self, request, slug, module_id):
+        course = get_object_or_404(Course, slug=slug)
+        module = get_object_or_404(Module, id=module_id, course=course)
+        
+        # Add module to request data
+        request_data = request.data.copy()
+        request_data['module'] = module.id
+        
+        serializer = ContentSerializer(data=request_data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
