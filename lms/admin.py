@@ -30,11 +30,12 @@ class ContentAdmin(admin.ModelAdmin):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ["module", "task_type", "available_until"]
+    list_display = ["task_id", "module", "task_type", "available_until"]
     list_filter = ["module", "task_type", "available_until"]
     search_fields = ["module", "task_type", "available_until"]
     date_hierarchy = 'available_from'
     actions = ['mark_as_overdue']
+    readonly_fields = ('task_id',)
     
     def mark_as_overdue(self, request, queryset):
         queryset.update(is_overdue=True)

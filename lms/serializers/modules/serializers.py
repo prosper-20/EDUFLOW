@@ -1,7 +1,20 @@
 from rest_framework import serializers
-from lms.models import Module, Content, Course
+from lms.models import Module, Content, Course, Task
+from rest_framework import serializers
+from django.contrib.contenttypes.models import ContentType
+from lms.models import Content, Text, File, Image, Video, Module
+
+class TaskCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['task_type', 'task',  'slug', 'due_date', 'submission_type', 'available_from', 'available_from']
 
 
+
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['task_type', 'task',  'slug', 'due_date', 'total_points']
 
 class ModuleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,9 +34,7 @@ class ModuleCreateSerializer(serializers.ModelSerializer):
 
 
 
-from rest_framework import serializers
-from django.contrib.contenttypes.models import ContentType
-from lms.models import Content, Text, File, Image, Video, Module
+
 
 class ContentTypeField(serializers.Field):
     """Custom field to handle content type model names"""

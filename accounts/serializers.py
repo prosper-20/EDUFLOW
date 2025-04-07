@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import UserProfile, Faculty, Course
+from .models import UserProfile, Faculty, Course, Department
 from django.contrib.auth import authenticate
 
 User = get_user_model()
@@ -10,8 +10,9 @@ class UserCreationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
     class Meta:
         model = User
-        fields = ["username", "email", "password", "password2"]
-        extra_kwargs = {"password": {"write_only": True}}
+        fields = ["username", "email", "role", "password", "password2"]
+        extra_kwargs = {"password": {"write_only": True},
+                        "role": {"required": False} }
 
 
     def validate_password(self, value):
@@ -51,11 +52,11 @@ class UserCreationSerializer(serializers.ModelSerializer):
 class InstructorCreationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
     faculty = serializers.CharField(required=True, max_length=30)
-    course = serializers.CharField(required=True, max_length=50)
+    department = serializers.CharField(required=True, max_length=70)
 
     class Meta:
         model = User
-        fields = ["username", "email", "faculty", "course", "password", "password2"]
+        fields = ["username", "email", "faculty", "department", "password", "password2"]
         extra_kwargs = {"password": {"write_only": True}}
 
     
@@ -66,13 +67,12 @@ class InstructorCreationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"Faculty with name {value} does not exist")
         return value
     
-    def validate_course(self, value):
+    def validate_department(self, value):
         try:
-            course = Course.objects.get(name=value)
-        except Course.DoesNotExist:
-            raise serializers.ValidationError(f"Course with name {value} does not exist")
+            department = Department.objects.get(name=value)
+        except Department.DoesNotExist:
+            raise serializers.ValidationError(f"Department with name {value} does not exist")
         return value
-    
 
 
 
@@ -101,7 +101,6 @@ class InstructorCreationSerializer(serializers.ModelSerializer):
         password2 = self.validated_data["password2"]
 
         user_faculty = Faculty.objects.get(name__iexact=self.validated_data.get("faculty"))
-        user_course = Course.objects.get(name__iexact=self.validated_data.get("course"))
 
         if password != password2:
             raise serializers.ValidationError({"Error": "Both passwords must match"})
@@ -110,7 +109,6 @@ class InstructorCreationSerializer(serializers.ModelSerializer):
         user.save()
         user_profile = UserProfile.objects.get(user=user)
         user_profile.faculty = user_faculty
-        user_profile.course = user_course
         user_profile.save()
         return user
     

@@ -1,10 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
-from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer
+from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer, TaskCreateSerializer, TaskSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Course, Enrollment, Module, Content
+from .models import Course, Enrollment, Module, Content, Task
 from rest_framework.permissions import IsAuthenticated
 from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent, IsInstructor
 from django.db.models import Count, Avg
@@ -179,3 +179,57 @@ class ContentCreateAPIView(APIView):
         serializer.save()
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CreateTask(APIView):
+    permission_classes = [IsInstructor, IsCourseOwnerOrReadOnly]
+
+    def post(self, request, slug, module_id):
+        course = get_object_or_404(Course, slug=slug)
+        module = get_object_or_404(Module, id=module_id, course=course)
+        task = Task(course=course, module=module, instructor=request.user)
+        serializer = TaskCreateSerializer(task, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"Success": "Task creation successful!",
+                         "data":serializer.data}, status=status.HTTP_201_CREATED)
+    
+
+
+class RetrieveTaskAPIView(APIView):
+    
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsCourseOwnerOrReadOnly()]  # Any authenticated user can view
+        elif self.request.method in ['PUT', 'DELETE']:
+            return [IsInstructor()]  # Only instructors can create
+        return super().get_permissions()
+
+    def get(self, request, slug, module_id, task_id):
+        course = get_object_or_404(Course, slug=slug)
+        module = get_object_or_404(Module, id=module_id, course=course)
+        task = get_object_or_404(Task, task_id=task_id, course=course, module=module)
+
+        serializer = TaskSerializer(task)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+    def put(self, request, slug, module_id, task_id):
+        course = get_object_or_404(Course, slug=slug)
+        module = get_object_or_404(Module, id=module_id, course=course)
+        task = get_object_or_404(Task, task_id=task_id, course=course, module=module)
+    
+        serializer = TaskCreateSerializer(task, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"Success": "Task update successful!",
+                         "data":serializer.data}, status=status.HTTP_200_OK)
+    
+
+    def delete(self, request, slug, module_id, task_id):
+        course = get_object_or_404(Course, slug=slug)
+        module = get_object_or_404(Module, id=module_id, course=course)
+        task = get_object_or_404(Task, task_id=task_id, course=course, module=module)
+        task.delete()
+        return Response({"Success": "Task deletion successful!"}, status=status.HTTP_204_NO_CONTENT)
+

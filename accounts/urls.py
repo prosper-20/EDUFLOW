@@ -8,3 +8,5 @@ urlpatterns = [
     path("login/", LoginAPIView.as_view(), name="login"),
     path("profile/", UserProfileAPIView.as_view(), name="user-profile")
 ]
+
+

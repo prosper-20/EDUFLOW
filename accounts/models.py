@@ -27,7 +27,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    role = models.CharField(choices=ROLE_CHOICES, max_length=50, blank=True, null=True)
+    role = models.CharField(choices=ROLE_CHOICES, max_length=50, default="Student")
     date_joined = models.DateTimeField(default=timezone.now)
     user_permissions = models.ManyToManyField(
         Permission,
@@ -61,7 +61,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class CustomToken(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     access_token = models.CharField(max_length=255)
     refresh_token = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -88,10 +88,10 @@ class CustomToken(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     image = models.ImageField(default="user.jpg", upload_to="profile_pictures")
-    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, blank=True, null=True)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
+    faculty = models.ForeignKey('lms.Faculty', on_delete=models.CASCADE, blank=True, null=True)
+    course = models.ForeignKey('lms.Course', on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -138,7 +138,7 @@ class Contact(models.Model):
 
 
 class OTPToken(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="otps")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="otps")
     otp_code = models.CharField(max_length=4)
     otp_created_at = models.DateTimeField(auto_now_add=True)
     otp_expires_at = models.DateTimeField()
@@ -157,7 +157,7 @@ class OTPToken(models.Model):
 
 
 class EmailOTPToken(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="email_otps")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps")
     otp_code = models.CharField(max_length=4)
     otp_created_at = models.DateTimeField(auto_now_add=True)
     otp_expires_at = models.DateTimeField()

@@ -7,6 +7,7 @@ from django.conf import settings
 from .fields import OrderField
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+import uuid
 # User = get_user_model()
 
 class Faculty(models.Model):
@@ -53,7 +54,7 @@ class Course(models.Model):
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(blank=True, null=True)
     code = models.CharField(max_length=10, blank=True, null=True)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={"role": "Instructor"})
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={"role__in": ["Instructor", "Admin"]})
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -209,10 +210,9 @@ class Task(models.Model):
     """
     TASK_TYPES = (
         ('assignment', 'assignment'),
-        ('individual', 'Individual'),
-        ('group', 'Group'),
-        ('quiz', 'Quiz'),
-        ('project', 'Project'),
+        ('quiz assignment', 'quiz assignment'),
+        ('question', 'question'),
+    
     )
     
     SUBMISSION_TYPES = (
@@ -232,21 +232,23 @@ class Task(models.Model):
         ('url', 'url')
     
     )
-
-    title = models.CharField(max_length=255)
-    description = models.TextField()
+    task_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    task_type = models.CharField(max_length=20, choices=TASK_TYPES)
+    task = models.TextField()
+    slug = models.SlugField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments')
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='assignments')
     instructor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={"role": "Instructor"}, related_name='created_assignments')
-    
+    task_file = models.FileField(upload_to="tasks/files/", blank=True, null=True)
     # Assignment configuration
-    task_type = models.CharField(max_length=20, choices=TASK_TYPES, default='individual')
+    
     submission_type = models.CharField(max_length=20, choices=SUBMISSION_TYPES, default='file')
     allowed_file_types = models.ManyToManyField(FileType, blank=True, help_text="Select all allowed file extensions (e.g., pdf,docx)")
     max_file_size = models.PositiveIntegerField(default=10, help_text="Maximum file size in MB")
     
     # Grading
-    points_possible = models.PositiveIntegerField(default=100)
+    total_points = models.PositiveIntegerField(default=100)
     grading_rubric = models.TextField(blank=True)
     
     # Dates
@@ -272,7 +274,12 @@ class Task(models.Model):
         ordering = ['due_date']
     
     def __str__(self):
-        return f"{self.title} - {self.course.title}"
+        return f"{self.task} - {self.course.name}"
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.task)
+        return super().save(*args, **kwargs)
 
 class TaskSubmission(models.Model):
     """
