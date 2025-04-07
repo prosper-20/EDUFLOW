@@ -192,3 +192,147 @@ class Image(ItemBase):
 
 class Video(ItemBase):
     url = models.URLField()
+
+from django.utils import timezone
+
+class FileType(models.Model):
+    name = models.CharField(max_length=10)
+    ext = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.name
+
+
+class Task(models.Model):
+    """
+    Represents an assignment within a course module
+    """
+    TASK_TYPES = (
+        ('assignment', 'assignment'),
+        ('individual', 'Individual'),
+        ('group', 'Group'),
+        ('quiz', 'Quiz'),
+        ('project', 'Project'),
+    )
+    
+    SUBMISSION_TYPES = (
+        ('file', 'File Upload'),
+        ('text', 'Text Entry'),
+        ('url', 'URL Submission'),
+        ('none', 'No Submission'),
+    )
+
+    FILE_TYPES = (
+        ('pdf', 'PDF'),
+        ('docx', 'DOCX'),
+        ('doc', 'DOC'),
+        ('xls', 'XLS'),
+        ('xlsx', 'XLSX'),
+        ('ppt', 'PPT'),
+        ('url', 'url')
+    
+    )
+
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='assignments')
+    instructor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={"role": "Instructor"}, related_name='created_assignments')
+    
+    # Assignment configuration
+    task_type = models.CharField(max_length=20, choices=TASK_TYPES, default='individual')
+    submission_type = models.CharField(max_length=20, choices=SUBMISSION_TYPES, default='file')
+    allowed_file_types = models.ManyToManyField(FileType, blank=True, help_text="Select all allowed file extensions (e.g., pdf,docx)")
+    max_file_size = models.PositiveIntegerField(default=10, help_text="Maximum file size in MB")
+    
+    # Grading
+    points_possible = models.PositiveIntegerField(default=100)
+    grading_rubric = models.TextField(blank=True)
+    
+    # Dates
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    due_date = models.DateTimeField()
+    available_from = models.DateTimeField(default=timezone.now)
+    available_until = models.DateTimeField(blank=True, null=True)
+    
+    # Settings
+    is_published = models.BooleanField(default=False)
+    allow_late_submissions = models.BooleanField(default=False)
+    late_submission_penalty = models.FloatField(default=0.0, 
+                                              help_text="Percentage penalty per day (e.g., 5.0 for 5% per day)")
+    require_passing_score = models.BooleanField(default=False)
+    passing_score = models.PositiveIntegerField(default=70, 
+                                              help_text="Minimum score needed to pass (if required)")
+    
+    # Discussion
+    allow_discussion = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['due_date']
+    
+    def __str__(self):
+        return f"{self.title} - {self.course.title}"
+
+class TaskSubmission(models.Model):
+    """
+    Represents a student's submission for an assignment
+    """
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='submissions')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={"role":"Student"}, related_name='assignment_submissions')
+    
+    # Submission content
+    text_content = models.TextField(blank=True)
+    file_upload = models.FileField(upload_to='assignments/submissions/', blank=True, null=True)
+    url_submission = models.URLField(blank=True)
+    
+    # Submission metadata
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    is_draft = models.BooleanField(default=True)
+    is_late = models.BooleanField(default=False)
+    
+    # Grading
+    grade = models.FloatField(blank=True, null=True)
+    feedback = models.TextField(blank=True)
+    graded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, limit_choices_to={"role": "Instructor"},
+                                related_name='graded_submissions')
+    graded_at = models.DateTimeField(blank=True, null=True)
+    
+    class Meta:
+        unique_together = ('task', 'student')
+        ordering = ['-submitted_at']
+    
+    def __str__(self):
+        return f"{self.student.username}'s submission for {self.task.title}"
+
+class TaskAttachment(models.Model):
+    """
+    Additional files attached to assignments by instructors
+    """
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='assignments/attachments/')
+    title = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Attachment for {self.task.title}"
+
+class StudentTaskProgress(models.Model):
+    """
+    Tracks student progress and interaction with assignments
+    """
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='assignment_progress')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='student_progress')
+    viewed = models.BooleanField(default=False)
+    viewed_at = models.DateTimeField(blank=True, null=True)
+    last_accessed = models.DateTimeField(blank=True, null=True)
+    time_spent = models.PositiveIntegerField(default=0, help_text="Time spent in seconds")
+    
+    class Meta:
+        unique_together = ('student', 'task')
+        verbose_name_plural = 'Student assignment progress'
+    
+    def __str__(self):
+        return f"{self.student.username}'s progress on {self.task.title}"

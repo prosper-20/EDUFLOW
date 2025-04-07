@@ -1,4 +1,6 @@
 .env
+tests
 db.sqlite3
 __pycache__/
-
+pytest.ini
+utils.py

@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Faculty, Department, Course, Enrollment, Module, Content
+from .models import Faculty, Department, Course, Enrollment, Module, Content, Task, FileType
+
+@admin.register(FileType)
+class FileTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'ext')
 
 
 class ModuleInline(admin.StackedInline):
@@ -21,6 +25,19 @@ admin.site.register([Faculty, Department, Enrollment, Module])
 class ContentAdmin(admin.ModelAdmin):
     list_display = ["module", "content_type"]
     list_filter = ["module", "content_type"]
+
+
+
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    list_display = ["module", "task_type", "available_until"]
+    list_filter = ["module", "task_type", "available_until"]
+    search_fields = ["module", "task_type", "available_until"]
+    date_hierarchy = 'available_from'
+    actions = ['mark_as_overdue']
+    
+    def mark_as_overdue(self, request, queryset):
+        queryset.update(is_overdue=True)
 
 
 
