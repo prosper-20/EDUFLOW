@@ -187,12 +187,23 @@ class CreateTask(APIView):
     def post(self, request, slug, module_id):
         course = get_object_or_404(Course, slug=slug)
         module = get_object_or_404(Module, id=module_id, course=course)
-        task = Task(course=course, module=module, instructor=request.user)
-        serializer = TaskCreateSerializer(task, data=request.data)
+        
+        # Initialize serializer with all data including file
+        serializer = TaskCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({"Success": "Task creation successful!",
-                         "data":serializer.data}, status=status.HTTP_201_CREATED)
+        
+        # Create task with all validated data
+        task = serializer.save(
+            course=course,
+            module=module,
+            instructor=request.user
+        )
+        
+        return Response({
+            "Success": "Task creation successful!",
+            "data": serializer.data
+        }, status=status.HTTP_201_CREATED)
+        
     
 
 

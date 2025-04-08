@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import Faculty, Department, Course, Enrollment, Module, Content, Task, FileType
+from .models import Faculty, Department, Course, Enrollment, Module, Content, Task, FileType, Classroom
+
+@admin.register(Classroom)
+class ClassroomAdmin(admin.ModelAdmin):
+    list_display = ['class_id', 'name', 'owner']
+    list_filter = ['owner']
+    search_fields = ["name", "class_id"]
+
 
 @admin.register(FileType)
 class FileTypeAdmin(admin.ModelAdmin):

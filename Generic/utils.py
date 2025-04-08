@@ -1,14 +1,17 @@
 import requests
+import random
+import string
+from django.db.models import Model
 
-url = "https://api.zeptomail.com/v1.1/email"
-
-payload = "{\n\"from\": { \"address\": \"<DOMAIN>\"},\n\"to\": [{\"email_address\": {\"address\": \"edwardprosper001@gmail.com\",\"name\": \"Prosper\"}}],\n\"subject\":\"Test Email\",\n\"htmlbody\":\"<div><b> Test email sent successfully.  </b></div>\"\n}"
-headers = {
-'accept': "application/json",
-'content-type': "application/json",
-'authorization': "<SEND_MAIL_TOKEN>",
-}
-
-response = requests.request("POST", url, data=payload, headers=headers)
-
-print(response.text)
+def generate_class_id(self):
+    """Generate a random 6-digit alphanumeric ID"""
+    while True:
+        # Create 6-character code with digits and uppercase letters
+        code = ''.join(random.choices(
+            string.ascii_uppercase + string.digits, 
+            k=6
+        ))
+        
+        # Check if code already exists
+        if not self.objects.filter(class_id=code).exists():
+            return code

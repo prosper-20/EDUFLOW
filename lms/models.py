@@ -7,7 +7,11 @@ from django.conf import settings
 from .fields import OrderField
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from Generic.utils import generate_class_id
 import uuid
+import random
+import string
+
 # User = get_user_model()
 
 class Faculty(models.Model):
@@ -343,3 +347,41 @@ class StudentTaskProgress(models.Model):
     
     def __str__(self):
         return f"{self.student.username}'s progress on {self.task.title}"
+    
+
+
+class Classroom(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, limit_choices_to={"role__in": ["Instructor", "Admin"]}, on_delete=models.CASCADE, related_name="classroom_owner")
+    class_id = models.CharField(max_length=6, blank=True, null=True, unique=True)
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(blank=True, null=True, unique=True)
+    students = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, limit_choices_to={"role": "Student"})
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
+    @classmethod
+    def generate_class_id(cls):
+        """Generate a random 6-digit alphanumeric ID"""
+        while True:
+            code = ''.join(random.choices(
+                string.ascii_uppercase + string.digits, 
+                k=6
+            ))
+            if not cls.objects.filter(class_id=code).exists():
+                return code
+    
+    
+
+    def save(self, *args, **kwargs):
+        if not self.slug and not self.class_id:
+            self.slug = slugify(self.name)
+            self.class_id = self.__class__.generate_class_id()
+        return super().save(*args, **kwargs)
+    
+
+  
+    
