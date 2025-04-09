@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Faculty, Department, Course, Enrollment, Module, Content, Task, FileType, Classroom
+from .models import Faculty, Department, Course, Enrollment, Module, Content, Task, FileType, Classroom, Level
+
+admin.site.register(Level)
 
 @admin.register(Classroom)
 class ClassroomAdmin(admin.ModelAdmin):

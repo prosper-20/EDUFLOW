@@ -1,5 +1,10 @@
 from django.urls import path
-from .views import CreateCourseAPIView, RetrieveCourseAPIView, CreateEnrollmentAPIView, ListAllMyCourseEnrollments, CreateModuleAPIView, ListCourseModuleAPIView, RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, RetrieveTaskAPIView
+from .views import CreateCourseAPIView, RetrieveCourseAPIView, CreateEnrollmentAPIView, ListAllMyCourseEnrollments, CreateModuleAPIView, ListCourseModuleAPIView, RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, RetrieveTaskAPIView, CreateClassromAPIView, StudentJoinClassroomAPIView
+
+CLASSROOM_URLS = [
+    path("classroom/create/", CreateClassromAPIView.as_view(), name="create-classroom"),
+    path("classroom/<str:class_id>/join/", StudentJoinClassroomAPIView.as_view(), name="join-class")
+]
 
 
 TASK_URLS = [
@@ -16,5 +21,6 @@ urlpatterns = [
     path("courses/<str:slug>/modules/", ListCourseModuleAPIView.as_view(), name="list-course-modules"),
     path("courses/<str:slug>/<int:module_id>/", RetrieveCourseModuleAPIView.as_view(), name="retrieve"),
     path("courses/<str:slug>/<int:module_id>/create/content/", ContentCreateAPIView.as_view(), name="create-course-content"),
-    *TASK_URLS
+    *TASK_URLS,
+    *CLASSROOM_URLS
     ] 

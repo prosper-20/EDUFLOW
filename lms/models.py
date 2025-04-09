@@ -349,6 +349,23 @@ class StudentTaskProgress(models.Model):
         return f"{self.student.username}'s progress on {self.task.title}"
     
 
+LEVEL_CHOICES = (
+    ("100", "100 L"),
+    ("200", "200 L"),
+    ("300", "300 L"),
+    ("400", "400 L"),
+    ("500", "500 L")
+)
+
+
+class Level(models.Model):
+    name = models.CharField(max_length=20)
+    code = models.CharField(max_length=10)
+    
+    def __str__(self):
+        return self.name
+
+
 
 class Classroom(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, limit_choices_to={"role__in": ["Instructor", "Admin"]}, on_delete=models.CASCADE, related_name="classroom_owner")
@@ -356,6 +373,8 @@ class Classroom(models.Model):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(blank=True, null=True, unique=True)
     students = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, limit_choices_to={"role": "Student"})
+    level_restriction = models.BooleanField(default=False)
+    accepted_levels = models.ManyToManyField(Level, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

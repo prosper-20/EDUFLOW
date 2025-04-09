@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404
 from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
 from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer, TaskCreateSerializer, TaskSerializer
+from lms.serializers.classroom.serializers import CreateClassroomSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Course, Enrollment, Module, Content, Task
+from .models import Classroom, Course, Enrollment, Module, Content, Task
 from rest_framework.permissions import IsAuthenticated
 from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent, IsInstructor
 from django.db.models import Count, Avg
@@ -243,4 +244,44 @@ class RetrieveTaskAPIView(APIView):
         task = get_object_or_404(Task, task_id=task_id, course=course, module=module)
         task.delete()
         return Response({"Success": "Task deletion successful!"}, status=status.HTTP_204_NO_CONTENT)
+    
+
+
+class CreateClassromAPIView(APIView):
+    permission_classes = [IsInstructor]
+
+    def post(self, request):
+        user=request.user
+        classroom = Classroom(owner=user)
+        serializer = CreateClassroomSerializer(classroom, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"Success": "Classroom created successfully",
+                         "data": serializer.data}, status=status.HTTP_201_CREATED)
+    
+
+
+class StudentJoinClassroomAPIView(APIView):
+    permission_classes = [IsStudent]
+
+    def post(self, request, class_id):
+        user = request.user
+        classroom = get_object_or_404(Classroom, class_id=class_id)
+        
+        if classroom.students.filter(id=user.id).exists():
+            return Response(
+                {"error": "Student is already in this classroom"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check level restriction if enabled
+        if classroom.level_restriction:
+            student_level = user.userprofile.level  # Assuming user has a 'level' field
+            if not classroom.accepted_levels.filter(id=student_level.id).exists():
+                return Response(
+                    {"error": "Student's level is not accepted in this classroom"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        classroom.students.add(user)
+        return Response({"Success": "Student joined the classroom successfully"}, status=status.HTTP_200_OK)
 

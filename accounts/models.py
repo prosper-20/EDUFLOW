@@ -92,6 +92,7 @@ class UserProfile(models.Model):
     image = models.ImageField(default="user.jpg", upload_to="profile_pictures")
     faculty = models.ForeignKey('lms.Faculty', on_delete=models.CASCADE, blank=True, null=True)
     course = models.ForeignKey('lms.Course', on_delete=models.CASCADE, blank=True, null=True)
+    level =models.ForeignKey('lms.Level', on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
