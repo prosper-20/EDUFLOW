@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
 from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer, TaskCreateSerializer, TaskSerializer
-from lms.serializers.classroom.serializers import CreateClassroomSerializer
+from lms.serializers.classroom.serializers import CreateClassroomSerializer, ClassroomSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -258,6 +258,16 @@ class CreateClassromAPIView(APIView):
         serializer.save()
         return Response({"Success": "Classroom created successfully",
                          "data": serializer.data}, status=status.HTTP_201_CREATED)
+    
+
+
+class RetrieveClassroomAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, class_id):
+        classroom = get_object_or_404(Classroom, class_id=class_id)
+        serializer = ClassroomSerializer(classroom)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 
 

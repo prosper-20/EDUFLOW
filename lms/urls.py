@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import CreateCourseAPIView, RetrieveCourseAPIView, CreateEnrollmentAPIView, ListAllMyCourseEnrollments, CreateModuleAPIView, ListCourseModuleAPIView, RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, RetrieveTaskAPIView, CreateClassromAPIView, StudentJoinClassroomAPIView
+from .views import CreateCourseAPIView, RetrieveCourseAPIView, CreateEnrollmentAPIView, ListAllMyCourseEnrollments, CreateModuleAPIView, ListCourseModuleAPIView, RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, RetrieveTaskAPIView, CreateClassromAPIView, StudentJoinClassroomAPIView, RetrieveClassroomAPIView
 
 CLASSROOM_URLS = [
     path("classroom/create/", CreateClassromAPIView.as_view(), name="create-classroom"),
+    path("classroom/<str:class_id>/", RetrieveClassroomAPIView.as_view(), name="retrieve-classroom"),
     path("classroom/<str:class_id>/join/", StudentJoinClassroomAPIView.as_view(), name="join-class")
 ]
 
