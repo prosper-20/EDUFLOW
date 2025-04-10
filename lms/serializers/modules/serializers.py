@@ -1,45 +1,12 @@
 from rest_framework import serializers
-from lms.models import Module, Content, Course, Task
+from lms.models import Module, Content, Course, Task, TaskSubmission
 from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
 from lms.models import Content, Text, File, Image, Video, Module
 from django.core.exceptions import ValidationError
 
 
-class TaskCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Task
-        fields = ['task_id', 'task_type', 'task', 'task_file', 'slug', 'due_date', 'submission_type', 'available_from', 'available_from']
-        extra_kwargs = {
-            'task_id': {'required': False}
-        }
 
-    
-    def validate(self, data):
-        task_type = data.get('task_type')
-        task_file = data.get('task_file')
-        
-        # Check if task requires a file
-        if task_type in ['assignment', 'quiz assignment'] and not task_file:
-            raise ValidationError({
-                'task_file': 'File upload is required for assignment and quiz assignment tasks'
-            })
-        
-        
-        # Additional validation if needed
-        if task_file and task_type == 'question':
-            raise ValidationError({
-                'task_file': 'File upload is not allowed for question-type tasks'
-            })
-            
-        return data
-
-
-
-class TaskSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Task
-        fields = ['task_type', 'task',  'slug', 'due_date', 'total_points']
 
 class ModuleSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,11 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
-from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer, TaskCreateSerializer, TaskSerializer
+from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer
+from lms.serializers.tasks.serializers import TaskCreateSerializer, TaskSerializer, TaskSubmissionSerializer
 from lms.serializers.classroom.serializers import CreateClassroomSerializer, ClassroomSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Classroom, Course, Enrollment, Module, Content, Task
+from .models import Classroom, Course, Enrollment, Module, Content, Task, TaskSubmission
 from rest_framework.permissions import IsAuthenticated
 from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent, IsInstructor
 from django.db.models import Count, Avg
@@ -206,6 +207,18 @@ class CreateTask(APIView):
         }, status=status.HTTP_201_CREATED)
         
     
+
+class CreateTaskSubmission(APIView):
+    permission_classes = [IsStudent]
+
+    def post(self, request, task_id):
+        task = get_object_or_404(Task, task_id=task_id)
+        task_submission = TaskSubmission(student=request.user, task=task)
+        serializer = TaskSubmissionSerializer(task_submission, data=request.data, context={'task_type': task.task_type})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"Success": "Submission saved successfully!",
+                         "data": serializer.data})
 
 
 class RetrieveTaskAPIView(APIView):
