@@ -7,7 +7,7 @@ from django.conf import settings
 from .fields import OrderField
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
-from Generic.utils import generate_class_id
+from Generic.utils import generate_class_id, task_submission_upload_path
 import uuid
 import random
 import string
@@ -226,16 +226,6 @@ class Task(models.Model):
         ('none', 'No Submission'),
     )
 
-    FILE_TYPES = (
-        ('pdf', 'PDF'),
-        ('docx', 'DOCX'),
-        ('doc', 'DOC'),
-        ('xls', 'XLS'),
-        ('xlsx', 'XLSX'),
-        ('ppt', 'PPT'),
-        ('url', 'url')
-    
-    )
     task_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     task_type = models.CharField(max_length=20, choices=TASK_TYPES)
     task = models.TextField()
@@ -294,7 +284,7 @@ class TaskSubmission(models.Model):
     
     # Submission content
     text_content = models.TextField(blank=True)
-    file_upload = models.FileField(upload_to='assignments/submissions/', blank=True, null=True)
+    file_upload = models.FileField(upload_to=task_submission_upload_path, blank=True, null=True)
     url_submission = models.URLField(blank=True)
     
     # Submission metadata

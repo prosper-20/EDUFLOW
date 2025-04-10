@@ -48,7 +48,8 @@ class TaskSubmissionSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'text_content': {'required': False},
             'file_upload': {'required': False},
-            'url_submission': {'required': False}
+            'url_submission': {'required': False},
+            
             }
         
     def validate(self, data):
@@ -60,13 +61,6 @@ class TaskSubmissionSerializer(serializers.ModelSerializer):
             raise ValidationError({
                 'file_upload': 'File upload is required for assignment and quiz assignment tasks'
             })
-        
-        
-        # # Additional validation if needed
-        # if task_file and task_type == 'question':
-        #     raise ValidationError({
-        #         'task_file': 'File upload is not allowed for question-type tasks'
-        #     })
             
         return data
 
@@ -79,3 +73,10 @@ class TaskSubmissionSerializer(serializers.ModelSerializer):
     def get_task_type(self, obj):
         # Get from context if available, otherwise from the task
         return self.context.get('task_type', obj.task.task_type)
+    
+
+
+class TaskSubmissionDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskSubmission
+        fields = "__all__"

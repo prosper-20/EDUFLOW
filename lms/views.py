@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404
+from Generic.utils import is_valid_file_type
 from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
 from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer
-from lms.serializers.tasks.serializers import TaskCreateSerializer, TaskSerializer, TaskSubmissionSerializer
+from lms.serializers.tasks.serializers import TaskCreateSerializer, TaskSerializer, TaskSubmissionSerializer, TaskSubmissionDetailSerializer
 from lms.serializers.classroom.serializers import CreateClassroomSerializer, ClassroomSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,7 +11,8 @@ from .models import Classroom, Course, Enrollment, Module, Content, Task, TaskSu
 from rest_framework.permissions import IsAuthenticated
 from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent, IsInstructor
 from django.db.models import Count, Avg
-
+from exceptions.custom_exceptions import *
+from django.core.exceptions import ValidationError
 
 class CreateCourseAPIView(APIView):
     permission_classes = [IsInstructor]
@@ -212,13 +214,56 @@ class CreateTaskSubmission(APIView):
     permission_classes = [IsStudent]
 
     def post(self, request, task_id):
-        task = get_object_or_404(Task, task_id=task_id)
-        task_submission = TaskSubmission(student=request.user, task=task)
-        serializer = TaskSubmissionSerializer(task_submission, data=request.data, context={'task_type': task.task_type})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({"Success": "Submission saved successfully!",
-                         "data": serializer.data})
+        try:
+            task = get_object_or_404(Task, task_id=task_id)
+            
+            # Check for existing submission
+            if TaskSubmission.objects.filter(task=task, student=request.user).exists():
+                raise DuplicateSubmissionError()
+            
+            # Handle file submission validation
+            if task.submission_type == 'file':
+                file = request.FILES.get('file_upload')
+                
+                if not file:
+                    raise ValidationError("No file was uploaded")
+                
+                if not is_valid_file_type(file, task.allowed_file_types.all()):
+                    allowed_extensions = list(task.allowed_file_types.values_list('ext', flat=True))
+                    raise InvalidFileTypeError(
+                        detail=f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}"
+                    )
+                
+                # Check file size (in MB)
+                max_size = task.max_file_size * 1024 * 1024  # Convert MB to bytes
+                if file.size > max_size:
+                    raise FileSizeExceededError(
+                        detail=f"File size exceeds maximum allowed size of {task.max_file_size}MB"
+                    )
+            
+            # Create the submission
+            task_submission = TaskSubmission(student=request.user, task=task)
+            serializer = TaskSubmissionSerializer(task_submission, data=request.data, context={"task_type": task.task_type})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            
+            return Response({
+                "success": "Submission saved successfully!",
+                "data": serializer.data
+            })
+            
+        except Exception as e:
+            raise  # This will be caught by your custom exception handler
+
+
+
+class RetrieveTaskSubmissionsAPIView(APIView):
+    permission_classes = [IsInstructor, IsCourseOwnerOrReadOnly]
+    def get(self, request, task_id):
+        task_submissions = TaskSubmission.objects.filter(task__id=task_id)
+        serializer =TaskSubmissionDetailSerializer(task_submissions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
 
 class RetrieveTaskAPIView(APIView):

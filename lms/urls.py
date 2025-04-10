@@ -1,17 +1,24 @@
 from django.urls import path
-from .views import CreateCourseAPIView, RetrieveCourseAPIView, CreateEnrollmentAPIView, ListAllMyCourseEnrollments, CreateModuleAPIView, ListCourseModuleAPIView, RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, RetrieveTaskAPIView, CreateClassromAPIView, StudentJoinClassroomAPIView, RetrieveClassroomAPIView, CreateTaskSubmission
+from .views import CreateCourseAPIView, RetrieveCourseAPIView, CreateEnrollmentAPIView, ListAllMyCourseEnrollments, CreateModuleAPIView, ListCourseModuleAPIView, RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, RetrieveTaskAPIView, CreateClassromAPIView, StudentJoinClassroomAPIView, RetrieveClassroomAPIView, CreateTaskSubmission, RetrieveTaskSubmissionsAPIView
 
 CLASSROOM_URLS = [
     path("classroom/create/", CreateClassromAPIView.as_view(), name="create-classroom"),
     path("classroom/<str:class_id>/", RetrieveClassroomAPIView.as_view(), name="retrieve-classroom"),
-    path("classroom/<str:class_id>/join/", StudentJoinClassroomAPIView.as_view(), name="join-class")
+    path("classroom/<str:class_id>/join/", StudentJoinClassroomAPIView.as_view(), name="join-class"),
+
 ]
 
 
 TASK_URLS = [
     path('courses/<str:slug>/<int:module_id>/create/task/', CreateTask.as_view(), name='task-create'),
     path("courses/<str:slug>/<int:module_id>/tasks/<uuid:task_id>/", RetrieveTaskAPIView.as_view(), name="retrieve-task"),
-    path("courses/task/<uuid:task_id>/", CreateTaskSubmission.as_view(), name="create-task-submission")
+    
+]
+
+TASK_SUBMISSION_URLS = [
+    path("courses/task/<uuid:task_id>/", CreateTaskSubmission.as_view(), name="create-task-submission"),
+    path("courses/task/<uuid:task_id>/submissions/", RetrieveTaskSubmissionsAPIView.as_view(), name="retrieve-task-submisions")
+
 ]
 
 urlpatterns = [
@@ -24,5 +31,6 @@ urlpatterns = [
     path("courses/<str:slug>/<int:module_id>/", RetrieveCourseModuleAPIView.as_view(), name="retrieve"),
     path("courses/<str:slug>/<int:module_id>/create/content/", ContentCreateAPIView.as_view(), name="create-course-content"),
     *TASK_URLS,
-    *CLASSROOM_URLS
+    *CLASSROOM_URLS,
+    *TASK_SUBMISSION_URLS
     ] 
