@@ -30,7 +30,8 @@ def task_submission_upload_path(instance, filename):
     """
     # Clean the task name to remove special characters and spaces
     task_name = slugify(instance.task.task)
-    return f'task_submissions/{task_name}/{filename}'
+    student_name = slugify(instance.student.username)
+    return f'task_submissions/{task_name}/{student_name}/{filename}'
 
 
 def is_valid_file_type(file, allowed_file_types):

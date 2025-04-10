@@ -295,6 +295,7 @@ class TaskSubmission(models.Model):
     
     # Grading
     grade = models.FloatField(blank=True, null=True)
+    is_graded = models.BooleanField(default=False)
     feedback = models.TextField(blank=True)
     graded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, limit_choices_to={"role": "Instructor"},
                                 related_name='graded_submissions')
@@ -305,7 +306,7 @@ class TaskSubmission(models.Model):
         ordering = ['-submitted_at']
     
     def __str__(self):
-        return f"{self.student.username}'s submission for {self.task.title}"
+        return f"{self.student.username}'s submission for {self.task.task}"
 
 class TaskAttachment(models.Model):
     """

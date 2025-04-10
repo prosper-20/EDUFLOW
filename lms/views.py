@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from django.shortcuts import render, get_object_or_404
 from Generic.utils import is_valid_file_type
 from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
@@ -257,12 +258,54 @@ class CreateTaskSubmission(APIView):
 
 
 
+# class RetrieveTaskSubmissionsAPIView(APIView):
+#     permission_classes = [IsInstructor, IsCourseOwnerOrReadOnly]
+
+#     def get(self, request, task_id, *args, **kwargs):
+#         is_graded = request.query_params.get("is_graded")
+#         is_not_graded = request.query_params.get("is_not_graded")
+
+#         if is_graded:
+#             task_submissions = TaskSubmission.objects.filter(task=task_id, is_graded=True)
+#         elif is_not_graded:
+#             task_submissions = TaskSubmission.objects.filter(task=task_id, is_graded=False)
+#         else:
+#             task_submissions = TaskSubmission.objects.filter(task__task_id=task_id)
+#             serializer =TaskSubmissionDetailSerializer(task_submissions, many=True)
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class RetrieveTaskSubmissionsAPIView(APIView):
     permission_classes = [IsInstructor, IsCourseOwnerOrReadOnly]
-    def get(self, request, task_id):
-        task_submissions = TaskSubmission.objects.filter(task__id=task_id)
-        serializer =TaskSubmissionDetailSerializer(task_submissions, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer_class = TaskSubmissionDetailSerializer  # Define serializer at class level
+
+    def get_queryset(self, task_id):
+        queryset = TaskSubmission.objects.filter(task__task_id=task_id)
+        is_graded = self.request.query_params.get("is_graded")
+        if is_graded is not None:
+            queryset = queryset.filter(is_graded=str(is_graded).lower() == 'true')
+        return queryset
+
+    def get(self, request, task_id, *args, **kwargs):
+        try:
+            task_submissions = self.get_queryset(task_id)
+            
+            # Use select_related/prefetch_related to optimize DB queries
+            task_submissions = task_submissions.select_related(
+                'student', 
+                'task', 
+                'task__course'
+            )
+            
+            serializer = self.serializer_class(task_submissions, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error retrieving task submissions: {str(e)}")
+            return Response(
+                {"error": "Failed to retrieve task submissions"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         
 
 

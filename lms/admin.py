@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import Faculty, Department, Course, Enrollment, Module, Content, Task, FileType, Classroom, Level
+from .models import Faculty, Department, Course, Enrollment, Module, Content, Task, FileType, Classroom, Level, TaskSubmission
+
+@admin.register(TaskSubmission)
+class TaskSubmissionAdmin(admin.ModelAdmin):
+    list_display = ["task", "student", "file_upload"]
+    list_filter = ["task"]
+    search_fields = ["student"]
 
 admin.site.register(Level)
 
