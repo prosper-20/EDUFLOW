@@ -283,6 +283,7 @@ class TaskSubmission(models.Model):
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={"role":"Student"}, related_name='assignment_submissions')
     
     # Submission content
+    submission_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     text_content = models.TextField(blank=True)
     file_upload = models.FileField(upload_to=task_submission_upload_path, blank=True, null=True)
     url_submission = models.URLField(blank=True)

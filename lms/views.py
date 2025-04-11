@@ -1,9 +1,10 @@
 from asyncio.log import logger
+from datetime import datetime
 from django.shortcuts import render, get_object_or_404
 from Generic.utils import is_valid_file_type
 from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
 from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer
-from lms.serializers.tasks.serializers import TaskCreateSerializer, TaskSerializer, TaskSubmissionSerializer, TaskSubmissionDetailSerializer
+from lms.serializers.tasks.serializers import TaskCreateSerializer, TaskSerializer, TaskSubmissionSerializer, TaskSubmissionDetailSerializer, GradeTaskSubmissionSerializer
 from lms.serializers.classroom.serializers import CreateClassroomSerializer, ClassroomSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -306,7 +307,24 @@ class RetrieveTaskSubmissionsAPIView(APIView):
                 {"error": "Failed to retrieve task submissions"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+
+
+class GradeTaskSubmissionAPIView(APIView):
+    permission_class = [IsInstructor, IsCourseOwnerOrReadOnly]
+
+    def post(self, request, task_id, submission_id):
+        task_submission = get_object_or_404(TaskSubmission, task__task_id=task_id, submission_id=submission_id)
+        serializer = GradeTaskSubmissionSerializer(task_submission, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(
+            graded_by=self.request.user,
+            graded_at=datetime.now(),
+            is_graded=True
+
+        )
+        serializer = TaskSubmissionDetailSerializer(task_submission)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class RetrieveTaskAPIView(APIView):

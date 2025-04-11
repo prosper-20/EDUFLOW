@@ -3,9 +3,10 @@ from .models import Faculty, Department, Course, Enrollment, Module, Content, Ta
 
 @admin.register(TaskSubmission)
 class TaskSubmissionAdmin(admin.ModelAdmin):
-    list_display = ["task", "student", "file_upload"]
+    list_display = ["submission_id", "task", "student", "file_upload"]
     list_filter = ["task"]
     search_fields = ["student"]
+    readonly_fields = ('submission_id',)
 
 admin.site.register(Level)
 

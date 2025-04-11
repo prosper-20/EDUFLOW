@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateCourseAPIView, RetrieveCourseAPIView, CreateEnrollmentAPIView, ListAllMyCourseEnrollments, CreateModuleAPIView, ListCourseModuleAPIView, RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, RetrieveTaskAPIView, CreateClassromAPIView, StudentJoinClassroomAPIView, RetrieveClassroomAPIView, CreateTaskSubmission, RetrieveTaskSubmissionsAPIView
+from .views import CreateCourseAPIView, RetrieveCourseAPIView, CreateEnrollmentAPIView, ListAllMyCourseEnrollments, CreateModuleAPIView, ListCourseModuleAPIView, RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, RetrieveTaskAPIView, CreateClassromAPIView, StudentJoinClassroomAPIView, RetrieveClassroomAPIView, CreateTaskSubmission, RetrieveTaskSubmissionsAPIView, GradeTaskSubmissionAPIView
 
 CLASSROOM_URLS = [
     path("classroom/create/", CreateClassromAPIView.as_view(), name="create-classroom"),
@@ -17,7 +17,9 @@ TASK_URLS = [
 
 TASK_SUBMISSION_URLS = [
     path("courses/task/<uuid:task_id>/", CreateTaskSubmission.as_view(), name="create-task-submission"),
-    path("courses/task/<uuid:task_id>/submissions/", RetrieveTaskSubmissionsAPIView.as_view(), name="retrieve-task-submisions")
+    path("courses/task/<uuid:task_id>/submissions/", RetrieveTaskSubmissionsAPIView.as_view(), name="retrieve-task-submisions"),
+    path("courses/task/<uuid:task_id>/submissions/<uuid:submission_id>/grade/", GradeTaskSubmissionAPIView.as_view(), name="grade-task-submision"),
+
 
 ]
 

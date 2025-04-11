@@ -80,3 +80,20 @@ class TaskSubmissionDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskSubmission
         fields = "__all__"
+
+
+class GradeTaskSubmissionSerializer(serializers.ModelSerializer):
+    grade = serializers.FloatField(required=True)
+    feedback = serializers.CharField(required=False, max_length=1000, allow_null=True, allow_blank=True)
+    
+    class Meta:
+        model = TaskSubmission
+        fields = ["grade", "feedback"]
+
+
+    def validate_grade(self, value):
+        if value > 100:
+            raise serializers.ValidationError(
+                {"Error": "Grade cannot be graeter than 100"}
+            )
+        return value
