@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.urls import reverse
-from lms.models import Classroom
+from lms.models import Classroom, ClassroomAnnouncement
 from django.core.exceptions import ValidationError
 
 class CreateClassroomSerializer(serializers.ModelSerializer):
@@ -46,4 +46,34 @@ class ClassroomSerializer(serializers.ModelSerializer):
 
     def get_class_room_link(self, obj:Classroom):
         return f"http://127.0.0.1:8000/lms/classroom/{obj.class_id}/join/"
+    
+
+
+class ClassroomDetailSerializer(serializers.ModelSerializer):
+    student_count = serializers.SerializerMethodField("get_student_count")
+    classroom_link = serializers.SerializerMethodField("get_class_room_link")
+    accepted_levels = serializers.StringRelatedField()
+    
+    class Meta:
+        model = Classroom
+        fields = ["class_id", "name", "slug", "accepted_levels", "classroom_link", "student_count"]
+
+    def get_class_room_link(self, obj:Classroom):
+        return f"http://127.0.0.1:8000/lms/classroom/{obj.class_id}/join/"
+    
+
+    def get_student_count(self, obj:Classroom):
+        return obj.students.count()
+    
+
+
+class CreateClassRoomAnnouncementSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ClassroomAnnouncement
+        fields = ["content", "classroom", "file"]
+        extra_kwargs = {
+            "file": {"required": False}
+        }
+
 

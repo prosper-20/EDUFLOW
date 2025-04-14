@@ -97,3 +97,17 @@ class GradeTaskSubmissionSerializer(serializers.ModelSerializer):
                 {"Error": "Grade cannot be graeter than 100"}
             )
         return value
+    
+
+
+class RetrieveTaskSubmissionGradeSerializer(serializers.ModelSerializer):
+    student_name = serializers.SerializerMethodField("get_student_name")
+    
+    class Meta:
+        model = TaskSubmission
+        fields = ["grade", "student", "student_name", "feedback"]
+
+    
+    def get_student_name(self, obj:TaskSubmission):
+        return obj.student.username.title()
+

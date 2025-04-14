@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Faculty, Department, Course, Enrollment, Module, Content, Task, FileType, Classroom, Level, TaskSubmission
+from .models import Faculty, Department, Course, Enrollment, Module, Content, Task, FileType, Classroom, Level, TaskSubmission, ClassroomAnnouncement
 
 @admin.register(TaskSubmission)
 class TaskSubmissionAdmin(admin.ModelAdmin):
@@ -34,7 +34,7 @@ class CourseAdmin(admin.ModelAdmin):
     inlines = [ModuleInline]
 
 
-admin.site.register([Faculty, Department, Enrollment, Module])
+admin.site.register([Faculty, Department, Enrollment, Module, ClassroomAnnouncement])
 
 
 @admin.register(Content)

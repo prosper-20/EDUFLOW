@@ -1,9 +1,18 @@
 from django.urls import path
-from .views import CreateCourseAPIView, RetrieveCourseAPIView, CreateEnrollmentAPIView, ListAllMyCourseEnrollments, CreateModuleAPIView, ListCourseModuleAPIView, RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, RetrieveTaskAPIView, CreateClassromAPIView, StudentJoinClassroomAPIView, RetrieveClassroomAPIView, CreateTaskSubmission, RetrieveTaskSubmissionsAPIView, GradeTaskSubmissionAPIView
+from .views import ( CreateCourseAPIView, RetrieveCourseAPIView, 
+CreateEnrollmentAPIView, ListAllMyCourseEnrollments, 
+CreateModuleAPIView, ListCourseModuleAPIView, 
+RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, 
+RetrieveTaskAPIView, CreateClassromAPIView, StudentJoinClassroomAPIView,
+ RetrieveClassroomAPIView, CreateTaskSubmission, 
+ RetrieveTaskSubmissionsAPIView, GradeTaskSubmissionAPIView, RetrieveClassroomMetaDataAPIView, RetrieveGradesTaskSubmissionAPIView, CreateClassroomAnnouncementAPIView
+)
 
 CLASSROOM_URLS = [
     path("classroom/create/", CreateClassromAPIView.as_view(), name="create-classroom"),
     path("classroom/<str:class_id>/", RetrieveClassroomAPIView.as_view(), name="retrieve-classroom"),
+    path("classroom/<str:class_id>/create/", CreateClassroomAnnouncementAPIView.as_view(), name="create-classroom-announcement"),
+    path("classroom/<str:class_id>/metadata/", RetrieveClassroomMetaDataAPIView.as_view(), name="retrieve-classroom-metadata"),
     path("classroom/<str:class_id>/join/", StudentJoinClassroomAPIView.as_view(), name="join-class"),
 
 ]
@@ -18,6 +27,7 @@ TASK_URLS = [
 TASK_SUBMISSION_URLS = [
     path("courses/task/<uuid:task_id>/", CreateTaskSubmission.as_view(), name="create-task-submission"),
     path("courses/task/<uuid:task_id>/submissions/", RetrieveTaskSubmissionsAPIView.as_view(), name="retrieve-task-submisions"),
+    path("courses/task/<uuid:task_id>/submissions/scores/", RetrieveGradesTaskSubmissionAPIView.as_view(), name="retrieve-submissions-scores"),
     path("courses/task/<uuid:task_id>/submissions/<uuid:submission_id>/grade/", GradeTaskSubmissionAPIView.as_view(), name="grade-task-submision"),
 
 

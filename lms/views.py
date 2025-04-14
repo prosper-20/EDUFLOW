@@ -4,12 +4,12 @@ from django.shortcuts import render, get_object_or_404
 from Generic.utils import is_valid_file_type
 from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
 from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer
-from lms.serializers.tasks.serializers import TaskCreateSerializer, TaskSerializer, TaskSubmissionSerializer, TaskSubmissionDetailSerializer, GradeTaskSubmissionSerializer
-from lms.serializers.classroom.serializers import CreateClassroomSerializer, ClassroomSerializer
+from lms.serializers.tasks.serializers import TaskCreateSerializer, TaskSerializer, TaskSubmissionSerializer, TaskSubmissionDetailSerializer, GradeTaskSubmissionSerializer, RetrieveTaskSubmissionGradeSerializer
+from lms.serializers.classroom.serializers import CreateClassroomSerializer, ClassroomSerializer, ClassroomDetailSerializer, CreateClassRoomAnnouncementSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Classroom, Course, Enrollment, Module, Content, Task, TaskSubmission
+from .models import Classroom, Course, Enrollment, Module, Content, Task, TaskSubmission, ClassroomAnnouncement
 from rest_framework.permissions import IsAuthenticated
 from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent, IsInstructor
 from django.db.models import Count, Avg
@@ -326,6 +326,14 @@ class GradeTaskSubmissionAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class RetrieveGradesTaskSubmissionAPIView(APIView):
+    permission_class = [IsInstructor, IsCourseOwnerOrReadOnly]
+
+    def get(self, request, task_id):
+        all_submissions = TaskSubmission.objects.filter(task__task_id=task_id)
+        graded_submissions = all_submissions.filter(is_graded=True)
+        serializer = RetrieveTaskSubmissionGradeSerializer(all_submissions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class RetrieveTaskAPIView(APIView):
     
@@ -379,6 +387,18 @@ class CreateClassromAPIView(APIView):
                          "data": serializer.data}, status=status.HTTP_201_CREATED)
     
 
+class CreateClassroomAnnouncementAPIView(APIView):
+    permission_classes = [IsInstructor, IsCourseOwnerOrReadOnly]
+
+    def post(self, request, class_id):
+        classroom = get_object_or_404(Classroom, class_id=class_id)
+        announcement = ClassroomAnnouncement(classroom=classroom)
+        serializer = CreateClassRoomAnnouncementSerializer(announcement, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"Success": "Classroom announcement created successfully",
+                         "data": serializer.data}, status=status.HTTP_201_CREATED)
+
 
 class RetrieveClassroomAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -386,6 +406,15 @@ class RetrieveClassroomAPIView(APIView):
     def get(self, request, class_id):
         classroom = get_object_or_404(Classroom, class_id=class_id)
         serializer = ClassroomSerializer(classroom)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class RetrieveClassroomMetaDataAPIView(APIView):
+    permission_classes = [IsInstructor]
+
+    def get(self, request, class_id):
+        classroom = get_object_or_404(Classroom, class_id=class_id)
+        serializer = ClassroomDetailSerializer(classroom)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
