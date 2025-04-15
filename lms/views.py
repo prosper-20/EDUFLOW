@@ -5,7 +5,7 @@ from Generic.utils import is_valid_file_type
 from lms.serializers.courses.serializers import CreateCourseSerializer, CourseSerializer, EnrollmentSerializer
 from lms.serializers.modules.serializers import ModuleCreateSerializer, ModuleSerializer, ContentSerializer
 from lms.serializers.tasks.serializers import TaskCreateSerializer, TaskSerializer, TaskSubmissionSerializer, TaskSubmissionDetailSerializer, GradeTaskSubmissionSerializer, RetrieveTaskSubmissionGradeSerializer
-from lms.serializers.classroom.serializers import CreateClassroomSerializer, ClassroomSerializer, ClassroomDetailSerializer, CreateClassRoomAnnouncementSerializer
+from lms.serializers.classroom.serializers import CreateClassroomSerializer, ClassroomSerializer, ClassroomDetailSerializer, CreateClassRoomAnnouncementSerializer, StudentAnnouncementInboxSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -398,6 +398,23 @@ class CreateClassroomAnnouncementAPIView(APIView):
         serializer.save()
         return Response({"Success": "Classroom announcement created successfully",
                          "data": serializer.data}, status=status.HTTP_201_CREATED)
+
+
+class MyClassroomAnnouncementAPIView(APIView):
+    '''
+    Retrieves all announcements from all the 
+    classes a student is registered in.
+    '''
+    permission_classes = [IsStudent]
+
+    def get(self, request):
+        student = request.user
+        announcements = ClassroomAnnouncement.objects.filter(
+            classroom__students=student
+        ).order_by('-created_at')
+        
+        serializer = StudentAnnouncementInboxSerializer(announcements, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class RetrieveClassroomAPIView(APIView):

@@ -77,3 +77,20 @@ class CreateClassRoomAnnouncementSerializer(serializers.ModelSerializer):
         }
 
 
+class StudentAnnouncementInboxSerializer(serializers.ModelSerializer):
+    classroom_name = serializers.StringRelatedField(read_only=True)
+    instructor = serializers.SerializerMethodField("get_instructor_name")
+    
+    
+    class Meta:
+        model = ClassroomAnnouncement
+        fields = ["classroom", "classroom_name", "instructor", "content", "file", "created_at"]
+        extra_kwargs = {
+            "file": {"required": False}
+        }
+
+    
+    def get_instructor_name(self, obj:ClassroomAnnouncement):
+        return obj.classroom.owner.username
+
+    

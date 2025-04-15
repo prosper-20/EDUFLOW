@@ -5,11 +5,12 @@ CreateModuleAPIView, ListCourseModuleAPIView,
 RetrieveCourseModuleAPIView, ContentCreateAPIView, CreateTask, 
 RetrieveTaskAPIView, CreateClassromAPIView, StudentJoinClassroomAPIView,
  RetrieveClassroomAPIView, CreateTaskSubmission, 
- RetrieveTaskSubmissionsAPIView, GradeTaskSubmissionAPIView, RetrieveClassroomMetaDataAPIView, RetrieveGradesTaskSubmissionAPIView, CreateClassroomAnnouncementAPIView
+ RetrieveTaskSubmissionsAPIView, GradeTaskSubmissionAPIView, RetrieveClassroomMetaDataAPIView, RetrieveGradesTaskSubmissionAPIView, CreateClassroomAnnouncementAPIView, MyClassroomAnnouncementAPIView
 )
 
 CLASSROOM_URLS = [
     path("classroom/create/", CreateClassromAPIView.as_view(), name="create-classroom"),
+    path("classroom/announcements/", MyClassroomAnnouncementAPIView.as_view(), name="classroom-announcements"),
     path("classroom/<str:class_id>/", RetrieveClassroomAPIView.as_view(), name="retrieve-classroom"),
     path("classroom/<str:class_id>/create/", CreateClassroomAnnouncementAPIView.as_view(), name="create-classroom-announcement"),
     path("classroom/<str:class_id>/metadata/", RetrieveClassroomMetaDataAPIView.as_view(), name="retrieve-classroom-metadata"),
