@@ -31,9 +31,17 @@ class CreateCourseSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     faculty = serializers.StringRelatedField()
     department = serializers.StringRelatedField()
+    enrollments = serializers.SerializerMethodField("get_enrollment_count")
+
+
     class Meta:
         model = Course
-        fields = ('faculty', 'department', 'name', 'code', "description", 'created_at', 'updated_at')
+        fields = ('faculty', 'department', 'name', 'code', "description", "enrollments", 'created_at', 'updated_at')
+
+    
+    def get_enrollment_count(self, obj:Course):
+        return obj.enrollments.count()
+
 
 
         

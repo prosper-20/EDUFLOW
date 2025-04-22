@@ -330,7 +330,7 @@ class RetrieveGradesTaskSubmissionAPIView(APIView):
     permission_class = [IsInstructor, IsCourseOwnerOrReadOnly]
 
     def get(self, request, task_id):
-        all_submissions = TaskSubmission.objects.filter(task__task_id=task_id)
+        all_submissions = TaskSubmission.objects.filter(task__task_id=task_id).order_by("grade")
         graded_submissions = all_submissions.filter(is_graded=True)
         serializer = RetrieveTaskSubmissionGradeSerializer(all_submissions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

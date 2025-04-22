@@ -2,6 +2,8 @@ from rest_framework import serializers
 from django.urls import reverse
 from lms.models import Classroom, ClassroomAnnouncement
 from django.core.exceptions import ValidationError
+from accounts.serializers import UserDetailSerializer, UserProfileSerializer
+
 
 class CreateClassroomSerializer(serializers.ModelSerializer):
     classroom_link = serializers.SerializerMethodField("get_class_room_link", read_only=True)
@@ -52,11 +54,12 @@ class ClassroomSerializer(serializers.ModelSerializer):
 class ClassroomDetailSerializer(serializers.ModelSerializer):
     student_count = serializers.SerializerMethodField("get_student_count")
     classroom_link = serializers.SerializerMethodField("get_class_room_link")
-    accepted_levels = serializers.StringRelatedField()
+    accepted_levels = serializers.StringRelatedField(many=True)
+    students = serializers.SerializerMethodField("students_data")
     
     class Meta:
         model = Classroom
-        fields = ["class_id", "name", "slug", "accepted_levels", "classroom_link", "student_count"]
+        fields = ["class_id", "name", "slug", "accepted_levels", "classroom_link", "student_count", "students"]
 
     def get_class_room_link(self, obj:Classroom):
         return f"http://127.0.0.1:8000/lms/classroom/{obj.class_id}/join/"
@@ -64,6 +67,10 @@ class ClassroomDetailSerializer(serializers.ModelSerializer):
 
     def get_student_count(self, obj:Classroom):
         return obj.students.count()
+    
+    def students_data(self, obj:Classroom):
+        students = obj.students.all()
+        return UserDetailSerializer(students, many=True).data
     
 
 

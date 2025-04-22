@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import UserProfile, Faculty, Course, Department
+from .models import UserProfile, Faculty, Course, Department, CustomUser
 from django.contrib.auth import authenticate
 
 User = get_user_model()
@@ -156,6 +156,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_user_data(self, obj:UserProfile):
         return obj.user.username, obj.user.email
+    
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ["username", "email"]
     
 
 
