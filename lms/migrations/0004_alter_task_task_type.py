@@ -6,13 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0003_alter_course_owner'),
+        ("lms", "0003_alter_course_owner"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='task_type',
-            field=models.CharField(choices=[('assignment', 'assignment'), ('quiz assignment', 'quiz assignment'), ('question', 'question')], max_length=20),
+            model_name="task",
+            name="task_type",
+            field=models.CharField(
+                choices=[
+                    ("assignment", "assignment"),
+                    ("quiz assignment", "quiz assignment"),
+                    ("question", "question"),
+                ],
+                max_length=20,
+            ),
         ),
     ]

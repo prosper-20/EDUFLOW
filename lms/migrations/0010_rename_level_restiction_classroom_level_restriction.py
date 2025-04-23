@@ -6,13 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0009_level_classroom_level_restiction_and_more'),
+        ("lms", "0009_level_classroom_level_restiction_and_more"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='classroom',
-            old_name='level_restiction',
-            new_name='level_restriction',
+            model_name="classroom",
+            old_name="level_restiction",
+            new_name="level_restriction",
         ),
     ]

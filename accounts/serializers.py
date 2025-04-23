@@ -8,12 +8,11 @@ User = get_user_model()
 
 class UserCreationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
+
     class Meta:
         model = User
         fields = ["username", "email", "role", "password", "password2"]
-        extra_kwargs = {"password": {"write_only": True},
-                        "role": {"required": False} }
-
+        extra_kwargs = {"password": {"write_only": True}, "role": {"required": False}}
 
     def validate_password(self, value):
         min_length = 8
@@ -21,20 +20,18 @@ class UserCreationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f"Password must be at least {min_length} characters long."
             )
-        
+
         if not any(char.isdigit() for char in value):
             raise serializers.ValidationError(
                 "Password must contain at least one digit."
             )
-        
+
         return value
 
-
-    
     def save(self):
         user = User(
-            username = self.validated_data.get("username"),
-            email = self.validated_data.get("email"),
+            username=self.validated_data.get("username"),
+            email=self.validated_data.get("email"),
         )
         password = self.validated_data["password"]
         password2 = self.validated_data["password2"]
@@ -44,9 +41,6 @@ class UserCreationSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
-    
-
-
 
 
 class InstructorCreationSerializer(serializers.ModelSerializer):
@@ -59,22 +53,23 @@ class InstructorCreationSerializer(serializers.ModelSerializer):
         fields = ["username", "email", "faculty", "department", "password", "password2"]
         extra_kwargs = {"password": {"write_only": True}}
 
-    
     def validate_faculty(self, value):
         try:
             faculty = Faculty.objects.get(name=value)
         except Faculty.DoesNotExist:
-            raise serializers.ValidationError(f"Faculty with name {value} does not exist")
+            raise serializers.ValidationError(
+                f"Faculty with name {value} does not exist"
+            )
         return value
-    
+
     def validate_department(self, value):
         try:
             department = Department.objects.get(name=value)
         except Department.DoesNotExist:
-            raise serializers.ValidationError(f"Department with name {value} does not exist")
+            raise serializers.ValidationError(
+                f"Department with name {value} does not exist"
+            )
         return value
-
-
 
     def validate_password(self, value):
         min_length = 8
@@ -82,25 +77,25 @@ class InstructorCreationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f"Password must be at least {min_length} characters long."
             )
-        
+
         if not any(char.isdigit() for char in value):
             raise serializers.ValidationError(
                 "Password must contain at least one digit."
             )
-        
+
         return value
 
-
-    
     def save(self):
         user = User(
-            username = self.validated_data.get("username"),
-            email = self.validated_data.get("email"),
+            username=self.validated_data.get("username"),
+            email=self.validated_data.get("email"),
         )
         password = self.validated_data["password"]
         password2 = self.validated_data["password2"]
 
-        user_faculty = Faculty.objects.get(name__iexact=self.validated_data.get("faculty"))
+        user_faculty = Faculty.objects.get(
+            name__iexact=self.validated_data.get("faculty")
+        )
 
         if password != password2:
             raise serializers.ValidationError({"Error": "Both passwords must match"})
@@ -111,8 +106,6 @@ class InstructorCreationSerializer(serializers.ModelSerializer):
         user_profile.faculty = user_faculty
         user_profile.save()
         return user
-    
-
 
 
 class LoginSerializer(serializers.Serializer):
@@ -124,45 +117,44 @@ class LoginSerializer(serializers.Serializer):
     #         if CustomUser.objects.filter(email=value).exists():
     #             return value
     #         raise serializers.ValidationError("Email address not found")
-    
-    
+
     def validate(self, data):
-        email = data.get('email')
-        password = data.get('password')
+        email = data.get("email")
+        password = data.get("password")
 
         if email and password:
             user = authenticate(email=email, password=password)
 
             if user:
                 if not user.is_active:
-                    msg = 'User account is disabled.'
-                    raise serializers.ValidationError(msg, code='authorization')
+                    msg = "User account is disabled."
+                    raise serializers.ValidationError(msg, code="authorization")
             else:
-                msg = 'Unable to log in with provided credentials.'
-                raise serializers.ValidationError(msg, code='authorization')
+                msg = "Unable to log in with provided credentials."
+                raise serializers.ValidationError(msg, code="authorization")
         else:
             msg = 'Must include "email" and "password".'
-            raise serializers.ValidationError(msg, code='authorization')
+            raise serializers.ValidationError(msg, code="authorization")
 
-        data['user'] = user
+        data["user"] = user
         return data
-    
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField("get_user_data")
+
     class Meta:
         model = UserProfile
-        fields = '__all__'
+        fields = "__all__"
 
-    def get_user_data(self, obj:UserProfile):
+    def get_user_data(self, obj: UserProfile):
         return obj.user.username, obj.user.email
-    
+
 
 class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ["username", "email"]
-    
 
 
 class EditUserProfileSerializer(serializers.ModelSerializer):

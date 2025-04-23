@@ -21,6 +21,7 @@ ROLE_CHOICES = (
     ("Admin", "Admin"),
 )
 
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=255)
     email = models.EmailField(_("email address"), unique=True)
@@ -31,20 +32,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
     user_permissions = models.ManyToManyField(
         Permission,
-        verbose_name=_('user permissions'),
+        verbose_name=_("user permissions"),
         blank=True,
-        related_name='custom_users'  # Unique related_name for CustomUser model
+        related_name="custom_users",  # Unique related_name for CustomUser model
     )
     groups = models.ManyToManyField(
         Group,
-        verbose_name=_('groups'),
+        verbose_name=_("groups"),
         blank=True,
-        related_name='custom_users'  # Change or add related_name here
+        related_name="custom_users",  # Change or add related_name here
     )
-    
 
     objects = CustomUserManager()
-
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
@@ -53,11 +52,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-    
+
     class Meta:
         verbose_name_plural = "Users"
-    
-    
 
 
 class CustomToken(models.Model):
@@ -67,7 +64,6 @@ class CustomToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     access_token_expires_at = models.DateTimeField()
     refresh_token_expires_at = models.DateTimeField()
-
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -81,24 +77,26 @@ class CustomToken(models.Model):
 
     def is_refresh_token_expired(self):
         return timezone.now() >= self.refresh_token_expires_at
-    
-
-
-    
 
 
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     image = models.ImageField(default="user.jpg", upload_to="profile_pictures")
-    faculty = models.ForeignKey('lms.Faculty', on_delete=models.CASCADE, blank=True, null=True)
-    course = models.ForeignKey('lms.Course', on_delete=models.CASCADE, blank=True, null=True)
-    level =models.ForeignKey('lms.Level', on_delete=models.CASCADE, blank=True, null=True)
+    faculty = models.ForeignKey(
+        "lms.Faculty", on_delete=models.CASCADE, blank=True, null=True
+    )
+    course = models.ForeignKey(
+        "lms.Course", on_delete=models.CASCADE, blank=True, null=True
+    )
+    level = models.ForeignKey(
+        "lms.Level", on_delete=models.CASCADE, blank=True, null=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.username} profile"
-    
+
     class Meta:
         verbose_name_plural = "User Profiles"
 
@@ -114,12 +112,11 @@ class Bank(models.Model):
     def __str__(self):
         return self.name
 
-    
 
 SUBJECT_CHOICES = (
     ("Complaint", "Complaint"),
     ("Inquiry", "Inquiry"),
-    ("Others", "Others")
+    ("Others", "Others"),
 )
 
 
@@ -129,50 +126,49 @@ class Contact(models.Model):
     subject = models.CharField(choices=SUBJECT_CHOICES, max_length=50)
     email_address = models.EmailField()
     whatsapp_number = models.CharField(max_length=11)
-    message  = models.TextField(max_length=500)
+    message = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.first_name
-    
 
 
 class OTPToken(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="otps")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="otps"
+    )
     otp_code = models.CharField(max_length=4)
     otp_created_at = models.DateTimeField(auto_now_add=True)
     otp_expires_at = models.DateTimeField()
 
     def __str__(self):
         return self.user.email
-    
+
     def save(self, *args, **kwargs):
         if not self.otp_expires_at:
             self.otp_expires_at = timezone.now() + timedelta(minutes=10)
         if not self.otp_code:
-            self.otp_code = '{:04d}'.format(secrets.randbelow(10000))
-            
+            self.otp_code = "{:04d}".format(secrets.randbelow(10000))
+
         super(OTPToken, self).save(*args, **kwargs)
 
 
-
 class EmailOTPToken(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps"
+    )
     otp_code = models.CharField(max_length=4)
     otp_created_at = models.DateTimeField(auto_now_add=True)
     otp_expires_at = models.DateTimeField()
 
     def __str__(self):
         return self.user.email
-    
+
     def save(self, *args, **kwargs):
         if not self.otp_expires_at:
             self.otp_expires_at = timezone.now() + timedelta(minutes=5)
         if not self.otp_code:
-            self.otp_code = '{:04d}'.format(secrets.randbelow(10000))
-            
+            self.otp_code = "{:04d}".format(secrets.randbelow(10000))
+
         super(EmailOTPToken, self).save(*args, **kwargs)
-
-
-

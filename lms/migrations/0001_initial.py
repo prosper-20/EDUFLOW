@@ -14,253 +14,628 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
+        ("contenttypes", "0002_remove_content_type_name"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Department',
+            name="Department",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('slug', models.SlugField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("slug", models.SlugField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name_plural': 'Departments',
+                "verbose_name_plural": "Departments",
             },
         ),
         migrations.CreateModel(
-            name='Faculty',
+            name="Faculty",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('slug', models.SlugField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("slug", models.SlugField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name_plural': 'Faculties',
+                "verbose_name_plural": "Faculties",
             },
         ),
         migrations.CreateModel(
-            name='FileType',
+            name="FileType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=10)),
-                ('ext', models.CharField(max_length=10)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=10)),
+                ("ext", models.CharField(max_length=10)),
             ],
         ),
         migrations.CreateModel(
-            name='Course',
+            name="Course",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, unique=True)),
-                ('slug', models.SlugField(blank=True, null=True)),
-                ('code', models.CharField(blank=True, max_length=10, null=True)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('owner', models.ForeignKey(limit_choices_to={'role': 'Instructor'}, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('department', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='lms.department')),
-                ('faculty', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='lms.faculty')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255, unique=True)),
+                ("slug", models.SlugField(blank=True, null=True)),
+                ("code", models.CharField(blank=True, max_length=10, null=True)),
+                ("description", models.TextField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        limit_choices_to={"role": "Instructor"},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "department",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="lms.department"
+                    ),
+                ),
+                (
+                    "faculty",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="lms.faculty"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Enrollment',
+            name="Enrollment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('enrollment_date', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('active', 'Active'), ('completed', 'Completed'), ('dropped', 'Dropped'), ('withdrawn', 'Withdrawn')], default='active', max_length=20)),
-                ('grade', models.CharField(blank=True, choices=[('A', 'Excellent'), ('B', 'Good'), ('C', 'Average'), ('D', 'Below Average'), ('F', 'Fail')], max_length=2, null=True)),
-                ('score', models.FloatField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(100)])),
-                ('is_audit', models.BooleanField(default=False)),
-                ('completion_date', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='enrollments', to='lms.course')),
-                ('student', models.ForeignKey(limit_choices_to={'role': 'Student'}, on_delete=django.db.models.deletion.CASCADE, related_name='enrollments', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("enrollment_date", models.DateTimeField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("active", "Active"),
+                            ("completed", "Completed"),
+                            ("dropped", "Dropped"),
+                            ("withdrawn", "Withdrawn"),
+                        ],
+                        default="active",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "grade",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("A", "Excellent"),
+                            ("B", "Good"),
+                            ("C", "Average"),
+                            ("D", "Below Average"),
+                            ("F", "Fail"),
+                        ],
+                        max_length=2,
+                        null=True,
+                    ),
+                ),
+                (
+                    "score",
+                    models.FloatField(
+                        blank=True,
+                        null=True,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(100),
+                        ],
+                    ),
+                ),
+                ("is_audit", models.BooleanField(default=False)),
+                ("completion_date", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="enrollments",
+                        to="lms.course",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        limit_choices_to={"role": "Student"},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="enrollments",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Enrollments',
-                'ordering': ['-enrollment_date'],
+                "verbose_name_plural": "Enrollments",
+                "ordering": ["-enrollment_date"],
             },
         ),
         migrations.AddField(
-            model_name='department',
-            name='faculty',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='lms.faculty'),
+            model_name="department",
+            name="faculty",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="lms.faculty"
+            ),
         ),
         migrations.CreateModel(
-            name='File',
+            name="File",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=250)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('file', models.FileField(upload_to='files')),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_related', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=250)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("file", models.FileField(upload_to="files")),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_related",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Image',
+            name="Image",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=250)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('file', models.FileField(upload_to='images')),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_related', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=250)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("file", models.FileField(upload_to="images")),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_related",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Module',
+            name="Module",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField(blank=True)),
-                ('order', lms.fields.OrderField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='modules', to='lms.course')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField(blank=True)),
+                ("order", lms.fields.OrderField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="modules",
+                        to="lms.course",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['order'],
+                "ordering": ["order"],
             },
         ),
         migrations.CreateModel(
-            name='Content',
+            name="Content",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('object_id', models.PositiveIntegerField()),
-                ('order', lms.fields.OrderField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('content_type', models.ForeignKey(limit_choices_to={'model__in': ('text', 'video', 'image', 'file')}, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
-                ('module', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='contents', to='lms.module')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("object_id", models.PositiveIntegerField()),
+                ("order", lms.fields.OrderField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        limit_choices_to={
+                            "model__in": ("text", "video", "image", "file")
+                        },
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                    ),
+                ),
+                (
+                    "module",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="contents",
+                        to="lms.module",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['order'],
+                "ordering": ["order"],
             },
         ),
         migrations.CreateModel(
-            name='Task',
+            name="Task",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('task_id', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('task_type', models.CharField(choices=[('assignment', 'assignment'), ('quiz assignment', 'quiz assignment'), ('question', 'question')], default='question', max_length=20)),
-                ('task', models.TextField()),
-                ('slug', models.SlugField(blank=True, null=True)),
-                ('description', models.TextField()),
-                ('task_file', models.FileField(blank=True, null=True, upload_to='tasks/files/')),
-                ('submission_type', models.CharField(choices=[('file', 'File Upload'), ('text', 'Text Entry'), ('url', 'URL Submission'), ('none', 'No Submission')], default='file', max_length=20)),
-                ('max_file_size', models.PositiveIntegerField(default=10, help_text='Maximum file size in MB')),
-                ('points_possible', models.PositiveIntegerField(default=100)),
-                ('grading_rubric', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('due_date', models.DateTimeField()),
-                ('available_from', models.DateTimeField(default=django.utils.timezone.now)),
-                ('available_until', models.DateTimeField(blank=True, null=True)),
-                ('is_published', models.BooleanField(default=False)),
-                ('allow_late_submissions', models.BooleanField(default=False)),
-                ('late_submission_penalty', models.FloatField(default=0.0, help_text='Percentage penalty per day (e.g., 5.0 for 5% per day)')),
-                ('require_passing_score', models.BooleanField(default=False)),
-                ('passing_score', models.PositiveIntegerField(default=70, help_text='Minimum score needed to pass (if required)')),
-                ('allow_discussion', models.BooleanField(default=True)),
-                ('allowed_file_types', models.ManyToManyField(blank=True, help_text='Select all allowed file extensions (e.g., pdf,docx)', to='lms.filetype')),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignments', to='lms.course')),
-                ('instructor', models.ForeignKey(limit_choices_to={'role': 'Instructor'}, on_delete=django.db.models.deletion.CASCADE, related_name='created_assignments', to=settings.AUTH_USER_MODEL)),
-                ('module', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignments', to='lms.module')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "task_id",
+                    models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
+                ),
+                (
+                    "task_type",
+                    models.CharField(
+                        choices=[
+                            ("assignment", "assignment"),
+                            ("quiz assignment", "quiz assignment"),
+                            ("question", "question"),
+                        ],
+                        default="question",
+                        max_length=20,
+                    ),
+                ),
+                ("task", models.TextField()),
+                ("slug", models.SlugField(blank=True, null=True)),
+                ("description", models.TextField()),
+                (
+                    "task_file",
+                    models.FileField(blank=True, null=True, upload_to="tasks/files/"),
+                ),
+                (
+                    "submission_type",
+                    models.CharField(
+                        choices=[
+                            ("file", "File Upload"),
+                            ("text", "Text Entry"),
+                            ("url", "URL Submission"),
+                            ("none", "No Submission"),
+                        ],
+                        default="file",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "max_file_size",
+                    models.PositiveIntegerField(
+                        default=10, help_text="Maximum file size in MB"
+                    ),
+                ),
+                ("points_possible", models.PositiveIntegerField(default=100)),
+                ("grading_rubric", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("due_date", models.DateTimeField()),
+                (
+                    "available_from",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
+                ("available_until", models.DateTimeField(blank=True, null=True)),
+                ("is_published", models.BooleanField(default=False)),
+                ("allow_late_submissions", models.BooleanField(default=False)),
+                (
+                    "late_submission_penalty",
+                    models.FloatField(
+                        default=0.0,
+                        help_text="Percentage penalty per day (e.g., 5.0 for 5% per day)",
+                    ),
+                ),
+                ("require_passing_score", models.BooleanField(default=False)),
+                (
+                    "passing_score",
+                    models.PositiveIntegerField(
+                        default=70,
+                        help_text="Minimum score needed to pass (if required)",
+                    ),
+                ),
+                ("allow_discussion", models.BooleanField(default=True)),
+                (
+                    "allowed_file_types",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="Select all allowed file extensions (e.g., pdf,docx)",
+                        to="lms.filetype",
+                    ),
+                ),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="assignments",
+                        to="lms.course",
+                    ),
+                ),
+                (
+                    "instructor",
+                    models.ForeignKey(
+                        limit_choices_to={"role": "Instructor"},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="created_assignments",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "module",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="assignments",
+                        to="lms.module",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['due_date'],
+                "ordering": ["due_date"],
             },
         ),
         migrations.CreateModel(
-            name='TaskAttachment',
+            name="TaskAttachment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(upload_to='assignments/attachments/')),
-                ('title', models.CharField(blank=True, max_length=255)),
-                ('description', models.TextField(blank=True)),
-                ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attachments', to='lms.task')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("file", models.FileField(upload_to="assignments/attachments/")),
+                ("title", models.CharField(blank=True, max_length=255)),
+                ("description", models.TextField(blank=True)),
+                ("uploaded_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "task",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="attachments",
+                        to="lms.task",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Text',
+            name="Text",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=250)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('content', models.TextField()),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_related', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=250)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("content", models.TextField()),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_related",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Video',
+            name="Video",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=250)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('url', models.URLField()),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_related', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=250)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("url", models.URLField()),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_related",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentTaskProgress',
+            name="StudentTaskProgress",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('viewed', models.BooleanField(default=False)),
-                ('viewed_at', models.DateTimeField(blank=True, null=True)),
-                ('last_accessed', models.DateTimeField(blank=True, null=True)),
-                ('time_spent', models.PositiveIntegerField(default=0, help_text='Time spent in seconds')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignment_progress', to=settings.AUTH_USER_MODEL)),
-                ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='student_progress', to='lms.task')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("viewed", models.BooleanField(default=False)),
+                ("viewed_at", models.DateTimeField(blank=True, null=True)),
+                ("last_accessed", models.DateTimeField(blank=True, null=True)),
+                (
+                    "time_spent",
+                    models.PositiveIntegerField(
+                        default=0, help_text="Time spent in seconds"
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="assignment_progress",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "task",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="student_progress",
+                        to="lms.task",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Student assignment progress',
-                'unique_together': {('student', 'task')},
+                "verbose_name_plural": "Student assignment progress",
+                "unique_together": {("student", "task")},
             },
         ),
         migrations.CreateModel(
-            name='TaskSubmission',
+            name="TaskSubmission",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('text_content', models.TextField(blank=True)),
-                ('file_upload', models.FileField(blank=True, null=True, upload_to='assignments/submissions/')),
-                ('url_submission', models.URLField(blank=True)),
-                ('submitted_at', models.DateTimeField(auto_now_add=True)),
-                ('last_modified', models.DateTimeField(auto_now=True)),
-                ('is_draft', models.BooleanField(default=True)),
-                ('is_late', models.BooleanField(default=False)),
-                ('grade', models.FloatField(blank=True, null=True)),
-                ('feedback', models.TextField(blank=True)),
-                ('graded_at', models.DateTimeField(blank=True, null=True)),
-                ('graded_by', models.ForeignKey(blank=True, limit_choices_to={'role': 'Instructor'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='graded_submissions', to=settings.AUTH_USER_MODEL)),
-                ('student', models.ForeignKey(limit_choices_to={'role': 'Student'}, on_delete=django.db.models.deletion.CASCADE, related_name='assignment_submissions', to=settings.AUTH_USER_MODEL)),
-                ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='submissions', to='lms.task')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("text_content", models.TextField(blank=True)),
+                (
+                    "file_upload",
+                    models.FileField(
+                        blank=True, null=True, upload_to="assignments/submissions/"
+                    ),
+                ),
+                ("url_submission", models.URLField(blank=True)),
+                ("submitted_at", models.DateTimeField(auto_now_add=True)),
+                ("last_modified", models.DateTimeField(auto_now=True)),
+                ("is_draft", models.BooleanField(default=True)),
+                ("is_late", models.BooleanField(default=False)),
+                ("grade", models.FloatField(blank=True, null=True)),
+                ("feedback", models.TextField(blank=True)),
+                ("graded_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "graded_by",
+                    models.ForeignKey(
+                        blank=True,
+                        limit_choices_to={"role": "Instructor"},
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="graded_submissions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        limit_choices_to={"role": "Student"},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="assignment_submissions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "task",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="submissions",
+                        to="lms.task",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-submitted_at'],
-                'unique_together': {('task', 'student')},
+                "ordering": ["-submitted_at"],
+                "unique_together": {("task", "student")},
             },
         ),
     ]

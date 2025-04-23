@@ -6,26 +6,34 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0008_alter_classroom_students'),
+        ("lms", "0008_alter_classroom_students"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Level',
+            name="Level",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=20)),
-                ('code', models.CharField(max_length=10)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=20)),
+                ("code", models.CharField(max_length=10)),
             ],
         ),
         migrations.AddField(
-            model_name='classroom',
-            name='level_restiction',
+            model_name="classroom",
+            name="level_restiction",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='classroom',
-            name='accepted_levels',
-            field=models.ManyToManyField(blank=True, to='lms.level'),
+            model_name="classroom",
+            name="accepted_levels",
+            field=models.ManyToManyField(blank=True, to="lms.level"),
         ),
     ]

@@ -7,13 +7,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0012_tasksubmission_is_graded'),
+        ("lms", "0012_tasksubmission_is_graded"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tasksubmission',
-            name='submission_id',
+            model_name="tasksubmission",
+            name="submission_id",
             field=models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
         ),
     ]

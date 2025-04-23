@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0004_alter_task_task_type'),
+        ("lms", "0004_alter_task_task_type"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='description',
+            model_name="task",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
     ]

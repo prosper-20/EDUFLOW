@@ -7,14 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0003_alter_customuser_role'),
-        ('lms', '0010_rename_level_restiction_classroom_level_restriction'),
+        ("accounts", "0003_alter_customuser_role"),
+        ("lms", "0010_rename_level_restiction_classroom_level_restriction"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='level',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='lms.level'),
+            model_name="userprofile",
+            name="level",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="lms.level",
+            ),
         ),
     ]

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0011_alter_tasksubmission_file_upload'),
+        ("lms", "0011_alter_tasksubmission_file_upload"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tasksubmission',
-            name='is_graded',
+            model_name="tasksubmission",
+            name="is_graded",
             field=models.BooleanField(default=False),
         ),
     ]

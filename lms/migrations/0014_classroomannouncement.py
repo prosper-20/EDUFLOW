@@ -7,19 +7,32 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0013_tasksubmission_submission_id'),
+        ("lms", "0013_tasksubmission_submission_id"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ClassroomAnnouncement',
+            name="ClassroomAnnouncement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('content', models.TextField()),
-                ('file', models.FileField(blank=True, null=True, upload_to='')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('classroom', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='lms.classroom')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("content", models.TextField()),
+                ("file", models.FileField(blank=True, null=True, upload_to="")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "classroom",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="lms.classroom"
+                    ),
+                ),
             ],
         ),
     ]
