@@ -287,7 +287,8 @@ class CreateTaskSubmission(APIView):
             serializer.save()
 
             return Response(
-                {"success": "Submission saved successfully!", "data": serializer.data}
+                {"success": "Submission saved successfully!", "data": serializer.data},
+                status=status.HTTP_201_CREATED
             )
 
         except Exception as e:
