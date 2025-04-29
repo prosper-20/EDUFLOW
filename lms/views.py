@@ -432,8 +432,9 @@ class CreateClassroomAnnouncementAPIView(APIView):
     permission_classes = [IsInstructor, IsCourseOwnerOrReadOnly]
 
     def post(self, request, class_id):
+        owner = request.user
         classroom = get_object_or_404(Classroom, class_id=class_id)
-        announcement = ClassroomAnnouncement(classroom=classroom)
+        announcement = ClassroomAnnouncement(classroom=classroom, owner=owner)
         serializer = CreateClassRoomAnnouncementSerializer(
             announcement, data=request.data
         )

@@ -15,6 +15,8 @@ import string
 # User = get_user_model()
 
 
+
+
 class Faculty(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(blank=True, null=True)
@@ -457,11 +459,13 @@ class Classroom(models.Model):
         return super().save(*args, **kwargs)
 
 
+User = settings.AUTH_USER_MODEL
+
 class ClassroomAnnouncement(models.Model):
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
     content = models.TextField()
     file = models.FileField(blank=True, null=True)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={"role__in": ["Instructor", "Admin"]})
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={"role__in": ["Instructor", "Admin"]})
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
