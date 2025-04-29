@@ -461,6 +461,7 @@ class ClassroomAnnouncement(models.Model):
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
     content = models.TextField()
     file = models.FileField(blank=True, null=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={"role__in": ["Instructor", "Admin"]})
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
