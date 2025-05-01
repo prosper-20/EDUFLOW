@@ -161,3 +161,38 @@ class EditUserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ["image", "course"]
+
+
+
+
+
+
+class InitiatePasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value).exists():
+            return value
+        raise serializers.ValidationError("Email address does not exist.")
+    
+
+class PasswordChangeSerializer(serializers.Serializer):
+    new_password = serializers.CharField(max_length=100, required=True)
+    confirm_new_password = serializers.CharField(max_length=100, required=True)
+
+    def validate(self, data):
+        new_password = data.get('new_password')
+        confirm_new_password = data.get('confirm_new_password')
+
+        if new_password != confirm_new_password:
+            raise serializers.ValidationError("The new password and its confirmation do not match.")
+
+        return data
+
+class PasswordResetSerializer(serializers.Serializer):
+    new_password = serializers.CharField(max_length=20, style= {'input_type': 'password'}, write_only=True)
+    confirm_new_password = serializers.CharField(max_length=20, style= {'input_type': 'password'}, write_only=True)
+
+    def validate_passwords(self, value):
+        if self.new_password != self.confirm_new_password:
+            raise serializers.ValidationError({"Response": "Both passwords must match"})
