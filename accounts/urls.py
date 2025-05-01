@@ -4,6 +4,7 @@ from .views import (
     InstructorCreationView,
     LoginAPIView,
     UserProfileAPIView,
+    ListUserFavouriteCoursesAPIView
 )
 
 
@@ -16,4 +17,5 @@ urlpatterns = [
     ),
     path("login/", LoginAPIView.as_view(), name="login"),
     path("profile/", UserProfileAPIView.as_view(), name="user-profile"),
+    path("favourites/", ListUserFavouriteCoursesAPIView.as_view(), name="user-favourites")
 ]

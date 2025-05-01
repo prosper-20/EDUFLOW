@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (
     CreateCourseAPIView,
+    AddCourseToFavouriteAPIView,
     RetrieveCourseAPIView,
     CreateEnrollmentAPIView,
     ListAllMyCourseEnrollments,
@@ -123,6 +124,7 @@ urlpatterns = [
         ContentCreateAPIView.as_view(),
         name="create-course-content",
     ),
+    path("courses/<str:slug>/favourites/", AddCourseToFavouriteAPIView.as_view(), name="add-course-to-favourites"),
     *TASK_URLS,
     *CLASSROOM_URLS,
     *TASK_SUBMISSION_URLS,

@@ -2,6 +2,7 @@ from asyncio.log import logger
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404
 from Generic.utils import is_valid_file_type
+from accounts.models import UserProfile
 from lms.serializers.courses.serializers import (
     CreateCourseSerializer,
     CourseSerializer,
@@ -86,6 +87,33 @@ class RetrieveCourseAPIView(APIView):
             {"Success": "Course Deleted Successfully!"},
             status=status.HTTP_204_NO_CONTENT,
         )
+    
+
+class AddCourseToFavouriteAPIView(APIView):
+    permission_classes = [IsStudent]
+
+    def post(self, request, slug):
+        user = request.user
+        course = get_object_or_404(Course, slug=slug)
+        profile = get_object_or_404(UserProfile, user=user)
+
+        if profile.favourite_courses.filter(id=course.id).exists():
+            profile.favourite_courses.remove(course)
+            profile.save()
+            action = "removed"
+        else:
+            profile.favourite_courses.add(course)
+            profile.save()
+            action = "added"
+        
+
+        return Response(
+            {"success": f"Course {action} to favourites."},
+            status=status.HTTP_200_OK
+        )
+    
+
+
 
 
 # class CreateEnrollmentAPIView(APIView):

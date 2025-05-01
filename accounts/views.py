@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from lms.serializers.courses.serializers import CourseSerializer
 from accounts.serializers import (
     UserCreationSerializer,
     InstructorCreationSerializer,
@@ -15,7 +16,8 @@ from django.utils import timezone
 from datetime import timedelta
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.permissions import IsAuthenticated
-
+from lms.models import Course
+from Generic.lms.permissions import IsStudent
 User = get_user_model()
 
 
@@ -98,3 +100,16 @@ class UserProfileAPIView(APIView):
             {"Success": "Profile update successful", "data": serializer.data},
             status=status.HTTP_202_ACCEPTED,
         )
+    
+
+
+class ListUserFavouriteCoursesAPIView(APIView):
+    permission_classes = [IsStudent]
+
+    def get(self, request):
+        user = request.user
+        courses = Course.objects.filter(favourite_courses__user=request.user)
+        favourite_count = user.userprofile.favourite_courses.count()
+        serializer = CourseSerializer(courses, many=True)
+        return Response({"Count": favourite_count,
+                         "data":serializer.data}, status=status.HTTP_200_OK)

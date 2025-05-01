@@ -29,6 +29,19 @@ class CreateCourseSerializer(serializers.ModelSerializer):
             )
 
 
+class AddCourseToFavouriteSerializer(serializers.Serializer):
+    slug = serializers.SlugField()
+
+    def validate_slug(self, value):
+        try:
+            course = Course.objects.get(slug=value)
+            return course
+        except Course.DoesNotExist:
+            raise serializers.ValidationError(
+                {"Error": f"Course with name {value} doesn't exist"}
+            )
+
+
 class CourseSerializer(serializers.ModelSerializer):
     faculty = serializers.StringRelatedField()
     department = serializers.StringRelatedField()
