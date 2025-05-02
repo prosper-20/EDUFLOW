@@ -61,10 +61,12 @@ class VideoSerializer(serializers.ModelSerializer):
 
 
 class ContentDetailSerializer(serializers.ModelSerializer):
+    module = ModuleSerializer()
+
     class Meta:
         model = Content
         fields = "__all__"
-        
+
 
 class ContentSerializer(serializers.ModelSerializer):
     content_type = ContentTypeField()
@@ -149,28 +151,38 @@ class ContentSerializer(serializers.ModelSerializer):
 
 from rest_framework import serializers
 
+
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
     replies = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Comment
-        fields = ['id', 'author', 'text', 'created_at', 'updated_at', 'parent', 'replies']
-        read_only_fields = ['author', 'created_at', 'updated_at']
-    
+        fields = ["id", "author", "text", "created_at", "updated_at", "replies"]
+        read_only_fields = ["author", "created_at", "updated_at"]
+
     def get_replies(self, obj):
         if obj.replies.exists():
             return CommentSerializer(obj.replies.filter(is_active=True), many=True).data
         return []
 
+
 class ContentWithCommentsSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     item = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Content
-        fields = ['id', 'module', 'content_type', 'object_id', 'item', 'order', 'comments']
-    
+        fields = [
+            "id",
+            "module",
+            "content_type",
+            "object_id",
+            "item",
+            "order",
+            "comments",
+        ]
+
     def get_item(self, obj):
         # Implement your content item serialization here
         return str(obj.item)

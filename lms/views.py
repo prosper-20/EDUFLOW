@@ -16,7 +16,7 @@ from lms.serializers.modules.serializers import (
     ContentSerializer,
     CommentSerializer,
     ContentDetailSerializer,
-    ContentWithCommentsSerializer
+    ContentWithCommentsSerializer,
 )
 from lms.serializers.tasks.serializers import (
     TaskCreateSerializer,
@@ -93,7 +93,7 @@ class RetrieveCourseAPIView(APIView):
             {"Success": "Course Deleted Successfully!"},
             status=status.HTTP_204_NO_CONTENT,
         )
-    
+
 
 class AddCourseToFavouriteAPIView(APIView):
     permission_classes = [IsStudent]
@@ -111,15 +111,10 @@ class AddCourseToFavouriteAPIView(APIView):
             profile.favourite_courses.add(course)
             profile.save()
             action = "added"
-        
 
         return Response(
-            {"success": f"Course {action} to favourites."},
-            status=status.HTTP_200_OK
+            {"success": f"Course {action} to favourites."}, status=status.HTTP_200_OK
         )
-    
-
-
 
 
 # class CreateEnrollmentAPIView(APIView):
@@ -268,43 +263,45 @@ class ContentRetrieveAPIView(APIView):
 
 class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [permissions.AllowAny()]
+        elif self.request.method == "POST":
+            return [permissions.IsAuthenticated()]
+        return super().get_permissions()
+
     def get_queryset(self):
-        content_id = self.kwargs['content_id']
-        return Comment.objects.filter(
-            content_id=content_id, 
-            parent__isnull=True,
-            is_active=True
-        ).order_by('created_at')
-    
-    def perform_create(self, serializer):
-        content_id = self.kwargs['content_id']
-        content = generics.get_object_or_404(Content, pk=content_id)
-        serializer.save(
-            content=content,
-            author=self.request.user
+        content_id = self.kwargs["content_id"]
+        return Comment.objects.filter(content__content_id=content_id, is_active=True).order_by(
+            "created_at"
         )
+
+    def perform_create(self, serializer):
+        content_id = self.kwargs["content_id"]
+        content = generics.get_object_or_404(Content, content_id=content_id)
+        serializer.save(content=content, author=self.request.user)
+
 
 class CommentReplyView(generics.CreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def perform_create(self, serializer):
-        parent_id = self.kwargs['pk']
+        parent_id = self.kwargs["pk"]
         parent_comment = generics.get_object_or_404(Comment, pk=parent_id)
         content = parent_comment.content
         serializer.save(
-            content=content,
-            author=self.request.user,
-            parent=parent_comment
+            content=content, author=self.request.user, parent=parent_comment
         )
+
 
 class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def perform_destroy(self, instance):
         # Soft delete instead of actual deletion
         instance.is_active = False

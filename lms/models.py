@@ -153,6 +153,7 @@ class Module(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     order = OrderField(blank=True, for_fields=["course"])
+    comments = GenericRelation("Comment")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -183,25 +184,27 @@ class Content(models.Model):
     class Meta:
         ordering = ["order"]
 
+    def __str__(self):
+        return str(self.content_id)
+
 
 class Comment(models.Model):
     content = models.ForeignKey(
-        'Content',
-        related_name='comments',
-        on_delete=models.CASCADE
+        "Content", related_name="comments", on_delete=models.CASCADE
     )
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name='comments',
-        on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL, related_name="comments", on_delete=models.CASCADE
     )
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    parent = models.ForeignKey(  # New field for replies
+        "self", related_name="replies", on_delete=models.CASCADE, null=True, blank=True
+    )
 
     class Meta:
-        ordering = ['created_at']
+        ordering = ["created_at"]
 
     def __str__(self):
         return f"Comment by {self.author} on {self.content}"

@@ -24,7 +24,7 @@ from .views import (
     CommentListCreateView,
     ContentRetrieveAPIView,
     CommentReplyView,
-    CommentRetrieveUpdateDestroyView
+    CommentRetrieveUpdateDestroyView,
 )
 
 CLASSROOM_URLS = [
@@ -93,12 +93,33 @@ TASK_SUBMISSION_URLS = [
     ),
 ]
 
+COMMENT_URLS = [
+    path(
+        "comments/<int:pk>/replies/", CommentReplyView.as_view(), name="comment-replies"
+    ),
+    path(
+        "comments/<int:pk>/",
+        CommentRetrieveUpdateDestroyView.as_view(),
+        name="comment-detail",
+    ),
+    path(
+        "contents/<uuid:content_id>/comments/",
+        CommentListCreateView.as_view(),
+        name="content-comments",
+    ),
+]
+
 urlpatterns = [
     path("courses/create/", CreateCourseAPIView.as_view(), name="create-course"),
     path(
         "courses/my-enrollments/",
         ListAllMyCourseEnrollments.as_view(),
         name="list-course-enrollments",
+    ),
+    path(
+        "courses/content/<uuid:content_id>/",
+        ContentRetrieveAPIView.as_view(),
+        name="retrieve-course-content",
     ),
     path(
         "courses/<str:slug>/", RetrieveCourseAPIView.as_view(), name="retrieve-course"
@@ -128,18 +149,13 @@ urlpatterns = [
         ContentCreateAPIView.as_view(),
         name="create-course-content",
     ),
-    path("courses/<str:slug>/<int:module_id>/<uuid:content_id>/", ContentRetrieveAPIView.as_view(), name="retrieve-course-content"),
-    path("courses/<str:slug>/favourites/", AddCourseToFavouriteAPIView.as_view(), name="add-course-to-favourites"),
-    path('contents/<int:content_id>/comments/', 
-         CommentListCreateView.as_view(), 
-         name='content-comments'),
-    path('comments/<int:pk>/replies/', 
-         CommentReplyView.as_view(), 
-         name='comment-replies'),
-    path('comments/<int:pk>/', 
-         CommentRetrieveUpdateDestroyView.as_view(), 
-         name='comment-detail'),
+    path(
+        "courses/<str:slug>/favourites/",
+        AddCourseToFavouriteAPIView.as_view(),
+        name="add-course-to-favourites",
+    ),
     *TASK_URLS,
     *CLASSROOM_URLS,
     *TASK_SUBMISSION_URLS,
+    *COMMENT_URLS,
 ]

@@ -91,7 +91,9 @@ class UserProfile(models.Model):
     level = models.ForeignKey(
         "lms.Level", on_delete=models.CASCADE, blank=True, null=True
     )
-    favourite_courses = models.ManyToManyField("lms.Course", blank=True, related_name="favourite_courses")
+    favourite_courses = models.ManyToManyField(
+        "lms.Course", blank=True, related_name="favourite_courses"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

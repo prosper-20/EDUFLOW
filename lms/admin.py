@@ -12,7 +12,15 @@ from .models import (
     Level,
     TaskSubmission,
     ClassroomAnnouncement,
+    Comment,
 )
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ["content", "author", "text", "created_at", "is_active"]
+    list_editable = ["is_active"]
+    list_filter = ["author", "content"]
 
 
 @admin.register(TaskSubmission)

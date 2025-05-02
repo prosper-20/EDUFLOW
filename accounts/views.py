@@ -11,7 +11,7 @@ from accounts.serializers import (
     EditUserProfileSerializer,
     InitiatePasswordResetSerializer,
     PasswordResetSerializer,
-    PasswordChangeSerializer
+    PasswordChangeSerializer,
 )
 from .models import CustomToken, UserProfile
 from django.contrib.auth import get_user_model
@@ -116,7 +116,6 @@ class UserProfileAPIView(APIView):
             {"Success": "Profile update successful", "data": serializer.data},
             status=status.HTTP_202_ACCEPTED,
         )
-    
 
 
 class ListUserFavouriteCoursesAPIView(APIView):
@@ -127,30 +126,35 @@ class ListUserFavouriteCoursesAPIView(APIView):
         courses = Course.objects.filter(favourite_courses__user=request.user)
         favourite_count = user.userprofile.favourite_courses.count()
         serializer = CourseSerializer(courses, many=True)
-        return Response({"Count": favourite_count,
-                         "data":serializer.data}, status=status.HTTP_200_OK)
-    
-
-
+        return Response(
+            {"Count": favourite_count, "data": serializer.data},
+            status=status.HTTP_200_OK,
+        )
 
 
 class PasswordChangeView(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request, format=None, **kwargs):
-        serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
+        serializer = PasswordChangeSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         current_user = User.objects.get(email=request.user)
         # if not current_user.check_password(serializer.validated_data['old_password']):
         #     return Response({"Error": "Current password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
         serializer.is_valid(raise_exception=True)
-        current_user.set_password(serializer.validated_data['new_password'])
+        current_user.set_password(serializer.validated_data["new_password"])
         current_user.save()
-        return Response({"Success": "Password successfully changed"}, status=status.HTTP_202_ACCEPTED)
-
+        return Response(
+            {"Success": "Password successfully changed"},
+            status=status.HTTP_202_ACCEPTED,
+        )
 
 
 class InitiatePasswordResetView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request, format=None):
         serializer = InitiatePasswordResetSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -159,16 +163,19 @@ class InitiatePasswordResetView(APIView):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         reset_link = f"http://127.0.0.1:8000/accounts/reset-password/{uid}/{token}/"
-        
-        subject = 'Password Reset!'
-        html_message = render_to_string('accounts/password_reset_email.html', {'uid': uid, 'token': token, 'reset_link': reset_link})
+
+        subject = "Password Reset!"
+        html_message = render_to_string(
+            "accounts/password_reset_email.html",
+            {"uid": uid, "token": token, "reset_link": reset_link},
+        )
         plain_message = strip_tags(html_message)
-        from_email = config('DEFAULT_FROM_EMAIL')  # Replace with your email
+        from_email = config("DEFAULT_FROM_EMAIL")  # Replace with your email
         to = email
         send_mail(subject, plain_message, from_email, [to], html_message=html_message)
-        return Response({"Success": "Password Reset email sent!"}, status=status.HTTP_200_OK)
-
-
+        return Response(
+            {"Success": "Password Reset email sent!"}, status=status.HTTP_200_OK
+        )
 
 
 class PasswordResetConfirmView(APIView):
@@ -183,9 +190,13 @@ class PasswordResetConfirmView(APIView):
             user = None
 
         if user is not None and default_token_generator.check_token(user, token):
-            new_password = serializer.validated_data.get('new_password')
+            new_password = serializer.validated_data.get("new_password")
             user.set_password(new_password)
             user.save()
-            return Response({'message': 'Password reset successfully'}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Password reset successfully"}, status=status.HTTP_200_OK
+            )
         else:
-            return Response({'message': 'Invalid reset link'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "Invalid reset link"}, status=status.HTTP_400_BAD_REQUEST
+            )
