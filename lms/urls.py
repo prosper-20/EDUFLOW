@@ -21,6 +21,10 @@ from .views import (
     RetrieveGradesTaskSubmissionAPIView,
     CreateClassroomAnnouncementAPIView,
     MyClassroomAnnouncementAPIView,
+    CommentListCreateView,
+    ContentRetrieveAPIView,
+    CommentReplyView,
+    CommentRetrieveUpdateDestroyView
 )
 
 CLASSROOM_URLS = [
@@ -124,7 +128,17 @@ urlpatterns = [
         ContentCreateAPIView.as_view(),
         name="create-course-content",
     ),
+    path("courses/<str:slug>/<int:module_id>/<uuid:content_id>/", ContentRetrieveAPIView.as_view(), name="retrieve-course-content"),
     path("courses/<str:slug>/favourites/", AddCourseToFavouriteAPIView.as_view(), name="add-course-to-favourites"),
+    path('contents/<int:content_id>/comments/', 
+         CommentListCreateView.as_view(), 
+         name='content-comments'),
+    path('comments/<int:pk>/replies/', 
+         CommentReplyView.as_view(), 
+         name='comment-replies'),
+    path('comments/<int:pk>/', 
+         CommentRetrieveUpdateDestroyView.as_view(), 
+         name='comment-detail'),
     *TASK_URLS,
     *CLASSROOM_URLS,
     *TASK_SUBMISSION_URLS,

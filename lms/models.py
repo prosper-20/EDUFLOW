@@ -11,6 +11,7 @@ from Generic.utils import generate_class_id, task_submission_upload_path
 import uuid
 import random
 import string
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
 # User = get_user_model()
 
@@ -163,6 +164,7 @@ class Module(models.Model):
 
 
 class Content(models.Model):
+    content_id = models.UUIDField(default=uuid.uuid4, editable=False)
     module = models.ForeignKey(
         Module, related_name="contents", on_delete=models.CASCADE
     )
@@ -173,12 +175,36 @@ class Content(models.Model):
     )
     object_id = models.PositiveIntegerField()
     item = GenericForeignKey("content_type", "object_id")
+    comments = GenericRelation("Comment")  # Add this line
     order = OrderField(blank=True, for_fields=["module"])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["order"]
+
+
+class Comment(models.Model):
+    content = models.ForeignKey(
+        'Content',
+        related_name='comments',
+        on_delete=models.CASCADE
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='comments',
+        on_delete=models.CASCADE
+    )
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.content}"
 
 
 class ItemBase(models.Model):

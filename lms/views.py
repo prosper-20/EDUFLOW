@@ -3,6 +3,8 @@ from datetime import datetime
 from django.shortcuts import render, get_object_or_404
 from Generic.utils import is_valid_file_type
 from accounts.models import UserProfile
+from rest_framework import generics, permissions
+from rest_framework.response import Response
 from lms.serializers.courses.serializers import (
     CreateCourseSerializer,
     CourseSerializer,
@@ -12,6 +14,9 @@ from lms.serializers.modules.serializers import (
     ModuleCreateSerializer,
     ModuleSerializer,
     ContentSerializer,
+    CommentSerializer,
+    ContentDetailSerializer,
+    ContentWithCommentsSerializer
 )
 from lms.serializers.tasks.serializers import (
     TaskCreateSerializer,
@@ -33,6 +38,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import (
     Classroom,
+    Comment,
     Course,
     Enrollment,
     Module,
@@ -249,6 +255,60 @@ class ContentCreateAPIView(APIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ContentRetrieveAPIView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, content_id):
+        content = get_object_or_404(Content, content_id=content_id)
+        serializer = ContentDetailSerializer(content)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CommentListCreateView(generics.ListCreateAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        content_id = self.kwargs['content_id']
+        return Comment.objects.filter(
+            content_id=content_id, 
+            parent__isnull=True,
+            is_active=True
+        ).order_by('created_at')
+    
+    def perform_create(self, serializer):
+        content_id = self.kwargs['content_id']
+        content = generics.get_object_or_404(Content, pk=content_id)
+        serializer.save(
+            content=content,
+            author=self.request.user
+        )
+
+class CommentReplyView(generics.CreateAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        parent_id = self.kwargs['pk']
+        parent_comment = generics.get_object_or_404(Comment, pk=parent_id)
+        content = parent_comment.content
+        serializer.save(
+            content=content,
+            author=self.request.user,
+            parent=parent_comment
+        )
+
+class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def perform_destroy(self, instance):
+        # Soft delete instead of actual deletion
+        instance.is_active = False
+        instance.save()
 
 
 class CreateTask(APIView):

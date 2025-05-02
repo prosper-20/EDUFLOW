@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from lms.models import Module, Content, Course, Task, TaskSubmission
+from lms.models import Module, Content, Course, Task, TaskSubmission, Comment
 from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
 from lms.models import Content, Text, File, Image, Video, Module
@@ -59,6 +59,12 @@ class VideoSerializer(serializers.ModelSerializer):
         fields = ["id", "owner", "title", "url", "created_at", "updated_at"]
         read_only_fields = ["owner", "created_at", "updated_at"]
 
+
+class ContentDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Content
+        fields = "__all__"
+        
 
 class ContentSerializer(serializers.ModelSerializer):
     content_type = ContentTypeField()
@@ -139,3 +145,32 @@ class ContentSerializer(serializers.ModelSerializer):
             representation["file"] = FileSerializer(content_item).data
 
         return representation
+
+
+from rest_framework import serializers
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField()
+    replies = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Comment
+        fields = ['id', 'author', 'text', 'created_at', 'updated_at', 'parent', 'replies']
+        read_only_fields = ['author', 'created_at', 'updated_at']
+    
+    def get_replies(self, obj):
+        if obj.replies.exists():
+            return CommentSerializer(obj.replies.filter(is_active=True), many=True).data
+        return []
+
+class ContentWithCommentsSerializer(serializers.ModelSerializer):
+    comments = CommentSerializer(many=True, read_only=True)
+    item = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Content
+        fields = ['id', 'module', 'content_type', 'object_id', 'item', 'order', 'comments']
+    
+    def get_item(self, obj):
+        # Implement your content item serialization here
+        return str(obj.item)

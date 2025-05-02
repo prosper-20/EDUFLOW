@@ -55,7 +55,7 @@ admin.site.register([Faculty, Department, Enrollment, Module, ClassroomAnnouncem
 
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):
-    list_display = ["module", "content_type"]
+    list_display = ["content_id", "module", "content_type"]
     list_filter = ["module", "content_type"]
 
 
