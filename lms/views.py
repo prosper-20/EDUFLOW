@@ -17,6 +17,7 @@ from lms.serializers.modules.serializers import (
     CommentSerializer,
     ContentDetailSerializer,
     ContentWithCommentsSerializer,
+    CommentDeactivateSerializer,
 )
 from lms.serializers.tasks.serializers import (
     TaskCreateSerializer,
@@ -47,12 +48,12 @@ from .models import (
     TaskSubmission,
     ClassroomAnnouncement,
 )
-from rest_framework.permissions import IsAuthenticated
-from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent, IsInstructor
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent, IsInstructor, IsIntructorOrAdmin
 from django.db.models import Count, Avg
 from exceptions.custom_exceptions import *
 from django.core.exceptions import ValidationError
-
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 
 class CreateCourseAPIView(APIView):
     permission_classes = [IsInstructor]
@@ -306,6 +307,25 @@ class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         # Soft delete instead of actual deletion
         instance.is_active = False
         instance.save()
+
+
+class CommentDeactivateAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.filter(is_active=True)
+    serializer_class = CommentDeactivateSerializer
+    permission_classes = [IsIntructorOrAdmin]
+
+    def perform_destroy(self, instance):
+        """Override delete to soft-delete (is_active=False) with replies"""
+        instance.deactivate_with_replies()
+
+    def delete(self, request, *args, **kwargs):
+        """Custom response for deactivation"""
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"detail": "Comment and all replies have been deactivated."},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 class CreateTask(APIView):

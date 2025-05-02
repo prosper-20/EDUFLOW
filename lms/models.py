@@ -6,7 +6,6 @@ from django.utils import timezone
 from django.conf import settings
 from .fields import OrderField
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
 from Generic.utils import generate_class_id, task_submission_upload_path
 import uuid
 import random
@@ -208,6 +207,16 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author} on {self.content}"
+    
+    def deactivate_with_replies(self):
+        """Deactivates this comment and all its replies recursively."""
+        self.is_active = False
+        self.save()
+        
+        # Get all replies (direct and nested) using a single query
+        replies = Comment.objects.filter(parent=self)
+        if replies.exists():
+            replies.update(is_active=False)  # Bulk update for efficiency
 
 
 class ItemBase(models.Model):

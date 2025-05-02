@@ -25,6 +25,7 @@ from .views import (
     ContentRetrieveAPIView,
     CommentReplyView,
     CommentRetrieveUpdateDestroyView,
+    CommentDeactivateAPIView,
 )
 
 CLASSROOM_URLS = [
@@ -106,6 +107,11 @@ COMMENT_URLS = [
         "contents/<uuid:content_id>/comments/",
         CommentListCreateView.as_view(),
         name="content-comments",
+    ),
+    path(
+        'comments/<int:pk>/deactivate/',
+        CommentDeactivateAPIView.as_view(),
+        name='comment-deactivate'
     ),
 ]
 

@@ -48,3 +48,15 @@ class IsInstructor(permissions.BasePermission):
             and request.user.is_authenticated
             and request.user.role == "Instructor"
         )
+
+class IsIntructorOrAdmin(permissions.BasePermission):
+    message = "Only users with Instructor role or Admin Priviledges can take down comments"
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        
+        # Then check privileges
+        return request.user.role == "Instructor" or request.user.is_superuser
+
+        

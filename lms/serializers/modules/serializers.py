@@ -165,6 +165,14 @@ class CommentSerializer(serializers.ModelSerializer):
         if obj.replies.exists():
             return CommentSerializer(obj.replies.filter(is_active=True), many=True).data
         return []
+    
+
+
+class CommentDeactivateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = []  # No fields needed for deactivation
+        read_only_fields = ['text', 'author', 'content']
 
 
 class ContentWithCommentsSerializer(serializers.ModelSerializer):
