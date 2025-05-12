@@ -9,6 +9,7 @@ from .views import (
     PasswordChangeView,
     PasswordResetConfirmView,
 )
+from django.urls import include
 
 
 urlpatterns = [
@@ -30,5 +31,6 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
     ),
+    path('socials/', include('drf_social_oauth2.urls', namespace='drf'))
     # path('confirm-email/<uidb64>/<str:token>/', ConfirmEmailView.as_view(), name='confirm-email'),
 ]
