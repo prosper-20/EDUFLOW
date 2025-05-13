@@ -19,11 +19,22 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from accounts.views import GoogleLogin, GoogleLoginCallback, LoginPage
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("lms/", include("lms.urls")),
+    path("google/login/", LoginPage.as_view(), name="google-login"),
+    path("api/v1/auth/", include("dj_rest_auth.urls")),
+    path("api/v1/auth/accounts/", include("allauth.urls")),
+    path("api/v1/auth/registration/", include("dj_rest_auth.registration.urls")),
+    path("api/v1/auth/google/", GoogleLogin.as_view(), name="google_login"),
+    path(
+        "api/v1/auth/google/callback/",
+        GoogleLoginCallback.as_view(),
+        name="google_login_callback",
+    ),
 ]
 
 

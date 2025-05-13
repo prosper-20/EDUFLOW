@@ -32,6 +32,13 @@ from django.utils.html import strip_tags
 from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
+from django.conf import settings
+from urllib.parse import urljoin
+import requests
+from django.urls import reverse
 
 
 User = get_user_model()
@@ -200,3 +207,115 @@ class PasswordResetConfirmView(APIView):
             return Response(
                 {"message": "Invalid reset link"}, status=status.HTTP_400_BAD_REQUEST
             )
+
+
+
+
+
+
+
+# class GoogleLogin(SocialLoginView):
+#     adapter_class = GoogleOAuth2Adapter
+#     callback_url = config("GOOGLE_OAUTH_CALLBACK_URL")
+#     client_class = OAuth2Client
+
+
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
+
+class CustomGoogleOAuth2Client(OAuth2Client):
+    def __init__(
+        self,
+        request,
+        consumer_key,
+        consumer_secret,
+        access_token_method,
+        access_token_url,
+        callback_url,
+        scope,  # This is fix for incompatibility between django-allauth==65.3.1 and dj-rest-auth==7.0.1
+        scope_delimiter=" ",
+        headers=None,
+        basic_auth=False,
+    ):
+        super().__init__(
+            request,
+            consumer_key,
+            consumer_secret,
+            access_token_method,
+            access_token_url,
+            callback_url,
+            scope_delimiter,
+            headers,
+            basic_auth,
+        )
+
+
+class GoogleLogin(SocialLoginView): # if you want to use Authorization Code Grant, use this
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = config("GOOGLE_OAUTH_CALLBACK_URL")
+    client_class = CustomGoogleOAuth2Client
+
+
+    def post(self, request, *args, **kwargs):
+        self.request = request
+        self.serializer = self.get_serializer(data=self.request.data)
+        self.serializer.is_valid(raise_exception=True)
+        
+        self.login()
+        return self.get_response()
+
+
+class GoogleLoginCallback(APIView):
+    def get(self, request, *args, **kwargs):
+        """
+        If you are building a fullstack application (eq. with React app next to Django)
+        you can place this endpoint in your frontend application to receive
+        the JWT tokens there - and store them in the state
+        """
+
+        code = request.GET.get("code")
+        print("ccc", code)
+
+        if code is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        # Remember to replace the localhost:8000 with the actual domain name before deployment
+        token_endpoint_url = urljoin("http://localhost:8000/", reverse("google_login"))
+        response = requests.post(url=token_endpoint_url, data={"code": code})
+        # print(response.json())
+        # return Response(response.json(), status=status.HTTP_200_OK)
+        response_data = response.json()
+        
+        if 'access_token' in response_data:
+            # Get user info from Google
+            user_info_url = 'https://www.googleapis.com/oauth2/v2/userinfo'
+            headers = {'Authorization': f'Bearer {response_data["access_token"]}'}
+            user_info_response = requests.get(user_info_url, headers=headers)
+            
+            if user_info_response.status_code == 200:
+                user_info = user_info_response.json()
+                response_data['user'] = {
+                    'email': user_info.get('email'),
+                    'first_name': user_info.get('given_name'),
+                    'last_name': user_info.get('family_name'),
+                    'picture': user_info.get('picture'),
+                }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+    
+
+from django.shortcuts import render
+from django.views import View
+
+
+class LoginPage(View):
+    def get(self, request, *args, **kwargs):
+        return render(
+            request,
+            "accounts/login.html",
+            {
+                "google_callback_uri": config("GOOGLE_OAUTH_CALLBACK_URL"),
+                "google_client_id": config("GOOGLE_OAUTH_CLIENT_ID"),
+            },
+        )

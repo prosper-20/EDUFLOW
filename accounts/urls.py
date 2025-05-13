@@ -10,6 +10,7 @@ from .views import (
     PasswordResetConfirmView,
 )
 from django.urls import include
+from accounts.views import GoogleLogin, GoogleLoginCallback, LoginPage
 
 
 urlpatterns = [
@@ -31,6 +32,7 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
     ),
-    path('socials/', include('drf_social_oauth2.urls', namespace='drf'))
-    # path('confirm-email/<uidb64>/<str:token>/', ConfirmEmailView.as_view(), name='confirm-email'),
+    # path('socials/', include('drf_social_oauth2.urls', namespace='drf')),
+    
+
 ]

@@ -44,11 +44,43 @@ INSTALLED_APPS = [
     "rest_framework",
     "accounts.apps.AccountsConfig",
     "lms.apps.LmsConfig",
-    'oauth2_provider',
-    'social_django',
-    'drf_social_oauth2',
+   
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'rest_framework.authtoken',
+    'allauth.socialaccount.providers.google',
+    'dj_rest_auth.registration',
 ]
 
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'jwt-auth',
+    'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh',
+    'USER_DETAILS_SERIALIZER': 'accounts.serializers.UserDetailSerializer',
+}
+
+
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+# Connect local account and social account if local account with that email address already exists
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APPS": [
+            {
+                "client_id": config("GOOGLE_OAUTH_CLIENT_ID"),
+                "secret": config("GOOGLE_OAUTH_CLIENT_SECRET"),
+                "key": "",
+            },
+        ],
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+    }
+}
+
+SITE_ID = 1
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 
@@ -72,6 +104,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -93,8 +126,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
+                # 'social_django.context_processors.backends',
+                # 'social_django.context_processors.login_redirect',
 
             ],
         },
@@ -133,14 +166,14 @@ DATABASES = {
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  # django-oauth-toolkit >= 1.0.0
-        'drf_social_oauth2.authentication.SocialAuthentication',
+        # 'oauth2_provider.contrib.rest_framework.OAuth2Authentication',  # django-oauth-toolkit >= 1.0.0
+        # 'drf_social_oauth2.authentication.SocialAuthentication',
     ),
     "EXCEPTION_HANDLER": "exceptions.exception_handler.custom_exception_handler",
 }
 
 AUTHENTICATION_BACKENDS = (
-   'drf_social_oauth2.backends.DjangoOAuth2',
+#    'drf_social_oauth2.backends.DjangoOAuth2',
    'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -201,3 +234,14 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+
+# ACCOUNT_AUTHENTICATION_METHOD = "email"  # Use Email / Password authentication
+# ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_EMAIL_REQUIRED = True
+
+
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ['username', 'email*', 'password1*', 'password2*']
+ACCOUNT_EMAIL_VERIFICATION = "none" # Do not require email confirmation

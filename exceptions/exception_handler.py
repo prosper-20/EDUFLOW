@@ -45,7 +45,7 @@ def custom_exception_handler(exc, context):
     elif isinstance(exc, (ValueError, TypeError)):
         logger.error(f"{type(exc).__name__}: {str(exc)}")
         return Response(
-            {"error": "Invalid data provided"}, status=status.HTTP_400_BAD_REQUEST
+            {"error": "provided"}, status=status.HTTP_400_BAD_REQUEST
         )
 
     # Handle AttributeError
