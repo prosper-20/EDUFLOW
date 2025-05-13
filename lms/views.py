@@ -5,7 +5,7 @@ from Generic.utils import is_valid_file_type
 from accounts.models import UserProfile
 from rest_framework import generics, permissions
 from rest_framework.response import Response
-from tasks.lms.announcement import send_announcement_email
+from tasks.accounts.tasks import send_welcome_email
 from lms.serializers.courses.serializers import (
     CreateCourseSerializer,
     CourseSerializer,
@@ -547,7 +547,7 @@ class CreateClassroomAnnouncementAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         id = serializer.data["id"]
-        send_announcement_email.delay(id)
+        # send_announcement_email.delay(id)
         return Response(
             {
                 "Success": "Classroom announcement created successfully",

@@ -9,7 +9,6 @@ User = get_user_model()
 
 @shared_task
 def send_welcome_email(user_id):
-      # Import inside function to avoid circular imports
     
     try:
         user = User.objects.get(id=user_id)
@@ -24,7 +23,7 @@ def send_welcome_email(user_id):
             'support_email': settings.DEFAULT_FROM_EMAIL,
         }
         
-        html_message = render_to_string('emails/welcome_email.html', context)
+        html_message = render_to_string('accounts/welcome_email.html', context)
         plain_message = strip_tags(html_message)
         
         send_mail(
