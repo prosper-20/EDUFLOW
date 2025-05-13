@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "accounts.apps.AccountsConfig",
     "lms.apps.LmsConfig",
-   
+    "celery",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -206,6 +206,14 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
+
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+# set the celery result backend
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+# set the celery timezone
+CELERY_TIMEZONE = 'UTC'
 
 
 # Static files (CSS, JavaScript, Images)

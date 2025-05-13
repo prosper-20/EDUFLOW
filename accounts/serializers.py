@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import UserProfile, Faculty, Course, Department, CustomUser
 from django.contrib.auth import authenticate
+from tasks.lms.accounts.welcome_mail import send_welcome_email
 
 User = get_user_model()
 
@@ -40,6 +41,9 @@ class UserCreationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"Error": "Both passwords must match"})
         user.set_password(password)
         user.save()
+
+        
+        send_welcome_email.delay(user.id)
         return user
 
 
