@@ -55,6 +55,8 @@ from django.db.models import Count, Avg
 from exceptions.custom_exceptions import *
 from django.core.exceptions import ValidationError
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from tasks.announcements.tasks import send_announcement_email
+
 
 class CreateCourseAPIView(APIView):
     permission_classes = [IsInstructor]
@@ -546,7 +548,8 @@ class CreateClassroomAnnouncementAPIView(APIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        id = serializer.data["id"]
+        
+        send_announcement_email(announcement.id)
         # send_announcement_email.delay(id)
         return Response(
             {

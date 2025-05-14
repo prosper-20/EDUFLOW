@@ -91,7 +91,7 @@ class CreateClassRoomAnnouncementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClassroomAnnouncement
-        fields = ["content", "classroom", "file"]
+        fields = ["content", "file"]
         extra_kwargs = {"file": {"required": False}}
 
 

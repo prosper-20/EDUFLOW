@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Announcement</title>
+</head>
+<body>
+    <h2>New Announcement in {{ classroom.name }}</h2>
+    <p>{{ announcement.content }}</p>
+    
+    {% if announcement.file %}
+    <p>Attachment: <a href="{{ announcement.file.url }}">Download file</a></p>
+    {% endif %}
+    
+    <p>Posted at: {{ announcement.created_at }}</p>
+    
+    <footer>
+        <p>This is an automated message. Please do not reply directly to this email.</p>
+    </footer>
+</body>
+</html>
