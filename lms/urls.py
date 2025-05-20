@@ -33,7 +33,7 @@ from .views import QuestionViewSet, OptionViewSet, QuizViewSet, QuizQuestionView
 router = DefaultRouter()
 router.register('questions', QuestionViewSet)
 router.register('options', OptionViewSet)
-router.register('my-quizzes', QuizViewSet)
+router.register('quiz', QuizViewSet)
 router.register('my-quiz-questions', QuizQuestionViewSet)
 
 

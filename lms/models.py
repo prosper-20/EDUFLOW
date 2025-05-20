@@ -11,7 +11,7 @@ import uuid
 import random
 import string
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-
+from django_extensions.db.fields import AutoSlugField
 # User = get_user_model()
 
 
@@ -549,6 +549,7 @@ class Option(models.Model):
 class Quiz(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='quizzes')
     title = models.CharField(max_length=255)
+    slug = AutoSlugField(populate_from='title')
     description = models.TextField(blank=True, null=True)
     duration = models.PositiveIntegerField(help_text="Duration in minutes")
     is_active = models.BooleanField(default=True)
