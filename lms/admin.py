@@ -13,7 +13,16 @@ from .models import (
     TaskSubmission,
     ClassroomAnnouncement,
     Comment,
+    Question,
+    Quiz,
+    QuizQuestion
 )
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ['id', 'course']
+    search_fields = ["text"]
 
 
 @admin.register(Comment)

@@ -639,7 +639,14 @@ class StudentJoinClassroomAPIView(APIView):
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated, IsIntructorOrAdmin]
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [permissions.AllowAny()]
+        elif self.request.method in ["POST", "DELETE", "PUT"]:
+            return [permissions.IsAuthenticated(), IsIntructorOrAdmin()]
+        return super().get_permissions()
 
     def get_queryset(self):
         queryset = super().get_queryset()

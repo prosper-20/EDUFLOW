@@ -4,7 +4,7 @@ from lms.models import Course, Question, Option, Quiz, QuizQuestion
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
-        fields = ['id', 'text', 'is_correct']
+        fields = ['question', 'text', 'text_words', 'is_correct']
 
 class QuestionSerializer(serializers.ModelSerializer):
     options = OptionSerializer(many=True, read_only=True)

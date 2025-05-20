@@ -28,11 +28,11 @@ from .views import (
     CommentDeactivateAPIView,
 )
 from rest_framework.routers import DefaultRouter
-from .views import CourseViewSet, QuestionViewSet, OptionViewSet, QuizViewSet, QuizQuestionViewSet
+from .views import QuestionViewSet, OptionViewSet, QuizViewSet, QuizQuestionViewSet
 
 router = DefaultRouter()
-router.register('my-questions', QuestionViewSet)
-router.register('my-options', OptionViewSet)
+router.register('questions', QuestionViewSet)
+router.register('options', OptionViewSet)
 router.register('my-quizzes', QuizViewSet)
 router.register('my-quiz-questions', QuizQuestionViewSet)
 

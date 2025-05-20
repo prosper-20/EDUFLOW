@@ -530,9 +530,17 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.text[:50]}..." if len(self.text) > 50 else self.text
 
+OPTION_CHOICES = (
+    ('A', 'A'),
+    ('B', 'B'),
+    ('C', 'C'),
+    ('D', 'D'),
+)
+
 class Option(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='options')
-    text = models.CharField(max_length=255)
+    text = models.CharField(max_length=1, choices=OPTION_CHOICES)
+    text_words = models.TextField()
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):
