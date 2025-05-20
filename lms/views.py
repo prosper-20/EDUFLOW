@@ -3,13 +3,20 @@ from datetime import datetime
 from django.shortcuts import render, get_object_or_404
 from Generic.utils import is_valid_file_type
 from accounts.models import UserProfile
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets
 from rest_framework.response import Response
 from tasks.accounts.tasks import send_welcome_email
 from lms.serializers.courses.serializers import (
     CreateCourseSerializer,
     CourseSerializer,
     EnrollmentSerializer,
+)
+from lms.serializers.quiz.serializers import (
+    QuizSerializer,
+    QuestionSerializer,
+    OptionSerializer,
+    QuizQuestionSerializer
+    
 )
 from lms.serializers.modules.serializers import (
     ModuleCreateSerializer,
@@ -43,6 +50,10 @@ from .models import (
     Comment,
     Course,
     Enrollment,
+    Option,
+    Question,
+    Quiz,
+    QuizQuestion,
     Module,
     Content,
     Task,
@@ -622,3 +633,39 @@ class StudentJoinClassroomAPIView(APIView):
             {"Success": "Student joined the classroom successfully"},
             status=status.HTTP_200_OK,
         )
+
+
+
+class QuestionViewSet(viewsets.ModelViewSet):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        course_slug = self.request.query_params.get('course')
+        if course_slug:
+            queryset = queryset.filter(course__slug=course_slug)
+        return queryset
+
+class OptionViewSet(viewsets.ModelViewSet):
+    queryset = Option.objects.all()
+    serializer_class = OptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class QuizViewSet(viewsets.ModelViewSet):
+    queryset = Quiz.objects.all()
+    serializer_class = QuizSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        course_slug = self.request.query_params.get('course')
+        if course_slug:
+            queryset = queryset.filter(course__slug=course_slug)
+        return queryset
+
+class QuizQuestionViewSet(viewsets.ModelViewSet):
+    queryset = QuizQuestion.objects.all()
+    serializer_class = QuizQuestionSerializer
+    permission_classes = [permissions.IsAuthenticated]

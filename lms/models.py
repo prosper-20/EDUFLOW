@@ -515,3 +515,50 @@ class ClassroomAnnouncement(models.Model):
 
     class Meta:
         verbose_name_plural = "Classroom Announcements"
+
+
+
+
+
+class Question(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='questions')
+    text = models.TextField()
+    marks = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.text[:50]}..." if len(self.text) > 50 else self.text
+
+class Option(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='options')
+    text = models.CharField(max_length=255)
+    is_correct = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.text} ({'Correct' if self.is_correct else 'Incorrect'})"
+
+class Quiz(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='quizzes')
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    duration = models.PositiveIntegerField(help_text="Duration in minutes")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+class QuizQuestion(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='quiz_questions')
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+        unique_together = ('quiz', 'question')
+
+    def __str__(self):
+        return f"{self.quiz.title} - {self.question.text[:30]}"
+

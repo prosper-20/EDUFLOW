@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views import (
     CreateCourseAPIView,
     AddCourseToFavouriteAPIView,
@@ -27,6 +27,17 @@ from .views import (
     CommentRetrieveUpdateDestroyView,
     CommentDeactivateAPIView,
 )
+from rest_framework.routers import DefaultRouter
+from .views import CourseViewSet, QuestionViewSet, OptionViewSet, QuizViewSet, QuizQuestionViewSet
+
+router = DefaultRouter()
+router.register('my-questions', QuestionViewSet)
+router.register('my-options', OptionViewSet)
+router.register('my-quizzes', QuizViewSet)
+router.register('my-quiz-questions', QuizQuestionViewSet)
+
+
+    
 
 CLASSROOM_URLS = [
     path("classroom/create/", CreateClassromAPIView.as_view(), name="create-classroom"),
@@ -115,6 +126,10 @@ COMMENT_URLS = [
     ),
 ]
 
+QUIZ_URLS = [
+    path('', include(router.urls)),
+]
+
 urlpatterns = [
     path("courses/create/", CreateCourseAPIView.as_view(), name="create-course"),
     path(
@@ -164,4 +179,5 @@ urlpatterns = [
     *CLASSROOM_URLS,
     *TASK_SUBMISSION_URLS,
     *COMMENT_URLS,
+    *QUIZ_URLS
 ]
