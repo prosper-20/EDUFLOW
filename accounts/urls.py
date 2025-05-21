@@ -33,6 +33,4 @@ urlpatterns = [
         name="password_reset_confirm",
     ),
     # path('socials/', include('drf_social_oauth2.urls', namespace='drf')),
-    
-
 ]

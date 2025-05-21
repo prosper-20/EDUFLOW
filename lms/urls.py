@@ -31,13 +31,11 @@ from rest_framework.routers import DefaultRouter
 from .views import QuestionViewSet, OptionViewSet, QuizViewSet, QuizQuestionViewSet
 
 router = DefaultRouter()
-router.register('questions', QuestionViewSet)
-router.register('options', OptionViewSet)
-router.register('quiz', QuizViewSet)
-router.register('my-quiz-questions', QuizQuestionViewSet)
+router.register("questions", QuestionViewSet, basename="questions")
+router.register("options", OptionViewSet)
+router.register("quiz", QuizViewSet)
+router.register("my-quiz-questions", QuizQuestionViewSet)
 
-
-    
 
 CLASSROOM_URLS = [
     path("classroom/create/", CreateClassromAPIView.as_view(), name="create-classroom"),
@@ -120,14 +118,14 @@ COMMENT_URLS = [
         name="content-comments",
     ),
     path(
-        'comments/<int:pk>/deactivate/',
+        "comments/<int:pk>/deactivate/",
         CommentDeactivateAPIView.as_view(),
-        name='comment-deactivate'
+        name="comment-deactivate",
     ),
 ]
 
 QUIZ_URLS = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]
 
 urlpatterns = [
@@ -179,5 +177,5 @@ urlpatterns = [
     *CLASSROOM_URLS,
     *TASK_SUBMISSION_URLS,
     *COMMENT_URLS,
-    *QUIZ_URLS
+    *QUIZ_URLS,
 ]

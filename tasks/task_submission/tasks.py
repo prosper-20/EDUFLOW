@@ -11,17 +11,21 @@ from django.conf import settings
 def notify_instructor_of_submission(submission_id):
     try:
         submission = TaskSubmission.objects.get(submission_id=submission_id)
-        instructor = submission.task.instructor  # Assuming Task model has instructor field
-        
+        instructor = (
+            submission.task.instructor
+        )  # Assuming Task model has instructor field
+
         subject = f"New Submission for {submission.task.task}"
         context = {
-            'task_title': submission.task.task,
-            'student_name': submission.student.username,
-            'submission_date': submission.submitted_at,
-            'submission_url': f"{settings.BASE_URL}/submissions/{submission.submission_id}/",
+            "task_title": submission.task.task,
+            "student_name": submission.student.username,
+            "submission_date": submission.submitted_at,
+            "submission_url": f"{settings.BASE_URL}/submissions/{submission.submission_id}/",
         }
-        
-        html_message = render_to_string('emails/new_submission_notification.html', context)
+
+        html_message = render_to_string(
+            "emails/new_submission_notification.html", context
+        )
         plain_message = strip_tags(html_message)
 
         send_mail(
@@ -32,7 +36,7 @@ def notify_instructor_of_submission(submission_id):
             html_message=html_message,
             fail_silently=False,
         )
-        
+
         return f"Email sent to {instructor.email}"
     except Exception as e:
         return f"Error sending email: {str(e)}"

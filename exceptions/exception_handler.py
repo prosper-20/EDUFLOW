@@ -44,9 +44,7 @@ def custom_exception_handler(exc, context):
     # Handle Python's built-in exceptions
     elif isinstance(exc, (ValueError, TypeError)):
         logger.error(f"{type(exc).__name__}: {str(exc)}")
-        return Response(
-            {"error": "provided"}, status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response({"error": "provided"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Handle AttributeError
     elif isinstance(exc, AttributeError):

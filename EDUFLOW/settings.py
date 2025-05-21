@@ -45,19 +45,19 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "lms.apps.LmsConfig",
     "celery",
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'rest_framework.authtoken',
-    'allauth.socialaccount.providers.google',
-    'dj_rest_auth.registration',
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "rest_framework.authtoken",
+    "allauth.socialaccount.providers.google",
+    "dj_rest_auth.registration",
 ]
 
 REST_AUTH = {
-    'USE_JWT': True,
-    'JWT_AUTH_COOKIE': 'jwt-auth',
-    'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh',
-    'USER_DETAILS_SERIALIZER': 'accounts.serializers.UserDetailSerializer',
+    "USE_JWT": True,
+    "JWT_AUTH_COOKIE": "jwt-auth",
+    "JWT_AUTH_REFRESH_COOKIE": "jwt-refresh",
+    "USER_DETAILS_SERIALIZER": "accounts.serializers.UserDetailSerializer",
 }
 
 
@@ -97,8 +97,8 @@ SIMPLE_JWT = {
 
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-    'social_django.context_processors.backends',
-    'social_django.context_processors.login_redirect',
+    "social_django.context_processors.backends",
+    "social_django.context_processors.login_redirect",
 )
 
 
@@ -128,7 +128,6 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 # 'social_django.context_processors.backends',
                 # 'social_django.context_processors.login_redirect',
-
             ],
         },
     },
@@ -173,8 +172,8 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-#    'drf_social_oauth2.backends.DjangoOAuth2',
-   'django.contrib.auth.backends.ModelBackend',
+    #    'drf_social_oauth2.backends.DjangoOAuth2',
+    "django.contrib.auth.backends.ModelBackend",
 )
 
 # Password validation
@@ -208,12 +207,11 @@ USE_I18N = True
 USE_TZ = True
 
 
-
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = "redis://localhost:6379/0"
 # set the celery result backend
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 # set the celery timezone
-CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = "UTC"
 
 
 # Static files (CSS, JavaScript, Images)
@@ -244,12 +242,11 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-
 # ACCOUNT_AUTHENTICATION_METHOD = "email"  # Use Email / Password authentication
 # ACCOUNT_USERNAME_REQUIRED = False
 # ACCOUNT_EMAIL_REQUIRED = True
 
 
 ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ['username', 'email*', 'password1*', 'password2*']
-ACCOUNT_EMAIL_VERIFICATION = "none" # Do not require email confirmation
+ACCOUNT_SIGNUP_FIELDS = ["username", "email*", "password1*", "password2*"]
+ACCOUNT_EMAIL_VERIFICATION = "none"  # Do not require email confirmation

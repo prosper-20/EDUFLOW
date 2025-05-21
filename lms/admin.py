@@ -16,24 +16,26 @@ from .models import (
     Question,
     Option,
     Quiz,
-    QuizQuestion
+    QuizQuestion,
 )
 
 
 @admin.register(Quiz)
 class QuizAdmin(admin.ModelAdmin):
-    list_display = ['course', 'title']
+    list_display = ["course", "title"]
+
 
 @admin.register(Option)
 class OptionAdmin(admin.ModelAdmin):
-    list_display = ('question', 'text', 'is_correct')
-    list_filter = ('is_correct',)
-    search_fields = ('option_text',)
-    list_editable = ['is_correct']
+    list_display = ("question", "text", "is_correct")
+    list_filter = ("is_correct",)
+    search_fields = ("option_text",)
+    list_editable = ["is_correct"]
+
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'course']
+    list_display = ["id", "course"]
     search_fields = ["text"]
 
 

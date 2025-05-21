@@ -15,8 +15,7 @@ from lms.serializers.quiz.serializers import (
     QuizSerializer,
     QuestionSerializer,
     OptionSerializer,
-    QuizQuestionSerializer
-    
+    QuizQuestionSerializer,
 )
 from lms.serializers.modules.serializers import (
     ModuleCreateSerializer,
@@ -61,7 +60,12 @@ from .models import (
     ClassroomAnnouncement,
 )
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from Generic.lms.permissions import IsCourseOwnerOrReadOnly, IsStudent, IsInstructor, IsIntructorOrAdmin
+from Generic.lms.permissions import (
+    IsCourseOwnerOrReadOnly,
+    IsStudent,
+    IsInstructor,
+    IsIntructorOrAdmin,
+)
 from django.db.models import Count, Avg
 from exceptions.custom_exceptions import *
 from django.core.exceptions import ValidationError
@@ -289,9 +293,9 @@ class CommentListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         content_id = self.kwargs["content_id"]
-        return Comment.objects.filter(content__content_id=content_id, is_active=True).order_by(
-            "created_at"
-        )
+        return Comment.objects.filter(
+            content__content_id=content_id, is_active=True
+        ).order_by("created_at")
 
     def perform_create(self, serializer):
         content_id = self.kwargs["content_id"]
@@ -338,7 +342,7 @@ class CommentDeactivateAPIView(RetrieveUpdateDestroyAPIView):
         self.perform_destroy(instance)
         return Response(
             {"detail": "Comment and all replies have been deactivated."},
-            status=status.HTTP_204_NO_CONTENT
+            status=status.HTTP_204_NO_CONTENT,
         )
 
 
@@ -559,7 +563,7 @@ class CreateClassroomAnnouncementAPIView(APIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        
+
         send_announcement_email(announcement.id)
         # send_announcement_email.delay(id)
         return Response(
@@ -635,7 +639,6 @@ class StudentJoinClassroomAPIView(APIView):
         )
 
 
-
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
@@ -650,27 +653,31 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        course_slug = self.request.query_params.get('course')
+        course_slug = self.request.query_params.get("course")
         if course_slug:
             queryset = queryset.filter(course__slug=course_slug)
         return queryset
+
 
 class OptionViewSet(viewsets.ModelViewSet):
     queryset = Option.objects.all()
     serializer_class = OptionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
 class QuizViewSet(viewsets.ModelViewSet):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_field = "slug"
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        course_slug = self.request.query_params.get('course')
+        course_slug = self.request.query_params.get("course")
         if course_slug:
             queryset = queryset.filter(course__slug=course_slug)
         return queryset
+
 
 class QuizQuestionViewSet(viewsets.ModelViewSet):
     queryset = QuizQuestion.objects.all()

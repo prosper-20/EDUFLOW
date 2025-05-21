@@ -12,6 +12,7 @@ import random
 import string
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django_extensions.db.fields import AutoSlugField
+
 # User = get_user_model()
 
 
@@ -207,12 +208,12 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author} on {self.content}"
-    
+
     def deactivate_with_replies(self):
         """Deactivates this comment and all its replies recursively."""
         self.is_active = False
         self.save()
-        
+
         # Get all replies (direct and nested) using a single query
         replies = Comment.objects.filter(parent=self)
         if replies.exists():
@@ -517,28 +518,31 @@ class ClassroomAnnouncement(models.Model):
         verbose_name_plural = "Classroom Announcements"
 
 
-
-
-
 class Question(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='questions')
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="questions"
+    )
     text = models.TextField()
     marks = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.text[:50]}..." if len(self.text) > 50 else self.text
+        return self.text
+
 
 OPTION_CHOICES = (
-    ('A', 'A'),
-    ('B', 'B'),
-    ('C', 'C'),
-    ('D', 'D'),
+    ("A", "A"),
+    ("B", "B"),
+    ("C", "C"),
+    ("D", "D"),
 )
 
+
 class Option(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='options')
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, related_name="options"
+    )
     text = models.CharField(max_length=1, choices=OPTION_CHOICES)
     text_words = models.TextField()
     is_correct = models.BooleanField(default=False)
@@ -546,10 +550,11 @@ class Option(models.Model):
     def __str__(self):
         return f"{self.text} ({'Correct' if self.is_correct else 'Incorrect'})"
 
+
 class Quiz(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='quizzes')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="quizzes")
     title = models.CharField(max_length=255)
-    slug = AutoSlugField(populate_from='title')
+    slug = AutoSlugField(populate_from="title")
     description = models.TextField(blank=True, null=True)
     duration = models.PositiveIntegerField(help_text="Duration in minutes")
     is_active = models.BooleanField(default=True)
@@ -559,15 +564,17 @@ class Quiz(models.Model):
     def __str__(self):
         return self.title
 
+
 class QuizQuestion(models.Model):
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='quiz_questions')
+    quiz = models.ForeignKey(
+        Quiz, on_delete=models.CASCADE, related_name="quiz_questions"
+    )
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ['order']
-        unique_together = ('quiz', 'question')
+        ordering = ["order"]
+        unique_together = ("quiz", "question")
 
     def __str__(self):
         return f"{self.quiz.title} - {self.question.text[:30]}"
-

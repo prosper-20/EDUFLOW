@@ -7,25 +7,26 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 @shared_task
 def send_welcome_email(user_id):
-    
+
     try:
         user = User.objects.get(id=user_id)
-        
+
         subject = "Welcome to Our Platform!"
-        
+
         # Prepare email content
         context = {
-            'username': user.username,
-            'email': user.email,
-            'role': user.role,
-            'support_email': settings.DEFAULT_FROM_EMAIL,
+            "username": user.username,
+            "email": user.email,
+            "role": user.role,
+            "support_email": settings.DEFAULT_FROM_EMAIL,
         }
-        
-        html_message = render_to_string('accounts/welcome_email.html', context)
+
+        html_message = render_to_string("accounts/welcome_email.html", context)
         plain_message = strip_tags(html_message)
-        
+
         send_mail(
             subject=subject,
             message=plain_message,
@@ -34,8 +35,8 @@ def send_welcome_email(user_id):
             html_message=html_message,
             fail_silently=False,
         )
-        
+
         return f"Welcome email sent to {user.email}"
-    
+
     except User.DoesNotExist:
         return "User not found"
